@@ -151,8 +151,8 @@
     border:1px solid var(--line);
     transition:background-color .2s, color .2s, border-color .2s;
   }
-  .readout-value.hero.ok{background:color-mix(in srgb, var(--teal) 12%, transparent); color:var(--teal);}
-  .readout-value.hero.exceeds{background:color-mix(in srgb, var(--red) 15%, transparent); color:var(--red);}
+  .readout-value.hero.ok{background:rgba(74,222,128,0.12); color:var(--teal);}
+  .readout-value.hero.exceeds{background:rgba(226,86,79,0.15); color:var(--red);}
   .readout-value.hero.pending{background:var(--panel-2); color:var(--muted);}
   .readout-value.hero.ok .unit,
   .readout-value.hero.exceeds .unit,
@@ -224,7 +224,7 @@
   .tabbar{
     position:fixed; left:50%; bottom:22px; transform:translateX(-50%);
     display:flex; gap:4px;
-    background:color-mix(in srgb, var(--panel) 85%, transparent);
+    background:rgba(24,28,34,0.85);
     -webkit-backdrop-filter:blur(16px); backdrop-filter:blur(16px);
     border:1px solid var(--line);
     border-radius:16px;
