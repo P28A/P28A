@@ -1,0 +1,2380 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="P28A">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon-dark.png" media="(prefers-color-scheme: dark)">
+<link rel="apple-touch-icon" href="apple-touch-icon-light.png" media="(prefers-color-scheme: light)">
+<title>PA-28-161 Cadet</title>
+<style>
+  :root{
+    --bg: #14181d;
+    --panel: #181c22;
+    --panel-2: #1e242c;
+    --line: #262e38;
+    --text: #e7ecf1;
+    --muted: #8a95a3;
+    --amber: #f2a63c;
+    --amber-dim: #7a5a26;
+    --teal: #4ade80;
+    --red: #e2564f;
+    --mono: 'JetBrains Mono', 'SF Mono', ui-monospace, Menlo, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html{ -webkit-text-size-adjust:100%; text-size-adjust:100%; }
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:var(--sans);
+    -webkit-font-smoothing:antialiased;
+    padding:20px 14px 60px;
+  }
+  .wrap{max-width:520px; margin:0 auto;}
+  header{margin-bottom:20px;}
+  .eyebrow{
+    font-family:var(--sans); font-size:11px; letter-spacing:0.14em;
+    color:var(--amber); text-transform:uppercase; margin-bottom:6px;
+  }
+  h1{font-size:22px; margin:0 0 4px; font-weight:650; letter-spacing:-0.01em;}
+  .sub{color:var(--muted); font-size:13px; line-height:1.5;}
+
+  .panel{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:18px;
+    margin-bottom:14px;
+  }
+  .panel h2{
+    font-size:11px; letter-spacing:0.1em;
+    color:var(--muted); margin:0 0 16px; font-weight:600;
+  }
+  .panel h2.title-large{
+    font-size:17px; font-weight:650; letter-spacing:normal;
+    text-transform:none; color:var(--text); margin:0 0 16px;
+  }
+
+  .field{margin-bottom:18px;}
+  .field:last-child{margin-bottom:0;}
+  .field.field-divider{
+    padding-bottom:18px; border-bottom:1px solid var(--line);
+  }
+  .field-label{
+    display:flex; justify-content:space-between; align-items:baseline;
+    margin-bottom:8px;
+  }
+  .field-label span:first-child{font-size:13px; color:var(--text); font-weight:500;}
+  .field-value{
+    font-family:var(--mono); font-size:15px; color:var(--amber); font-weight:600;
+  }
+  .field-value-wrap{
+    display:flex; align-items:center; gap:5px;
+  }
+  .field-value-input{
+    font-family:var(--mono); font-size:15px; line-height:1.2; color:var(--amber); font-weight:600;
+    background:var(--panel-2); border:1px solid var(--line); border-radius:6px;
+    width:64px; padding:3px 6px; text-align:right; outline:none;
+    -moz-appearance:textfield; -webkit-appearance:none; appearance:none;
+    -webkit-text-size-adjust:100%; text-size-adjust:100%;
+  }
+  .field-value-input:focus{border-color:var(--amber-dim);}
+  .field-value-input:disabled{
+    background:transparent; border-color:transparent; color:var(--text); cursor:default;
+    font-weight:400;
+  }
+  .stepper-btn{
+    width:26px; height:26px; border-radius:50%; flex:none;
+    background:var(--panel-2); border:1px solid var(--line);
+    color:var(--muted); font-family:var(--mono); font-size:15px; font-weight:700;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; line-height:1; padding:0; user-select:none;
+    transition:color .15s, border-color .15s;
+  }
+  .stepper-btn:active{ background:var(--panel-2); color:var(--amber); border-color:var(--amber); }
+  .stepper-btn:disabled{ opacity:0.35; cursor:default; }
+  .field-value-input::-webkit-outer-spin-button,
+  .field-value-input::-webkit-inner-spin-button{-webkit-appearance:none; margin:0;}
+  .field-value-fixed{
+    font-family:var(--mono); font-size:15px; line-height:1.2; color:var(--amber); font-weight:400;
+    display:inline-block; width:64px; padding:3px 6px; text-align:right;
+    border:1px solid transparent;
+  }
+  .field-value-unit{
+    font-family:var(--sans); font-size:13px; color:var(--muted);
+    display:inline-block; width:26px; text-align:left;
+  }
+  .field-value-fixed.pending{ color:var(--text); }
+  .field-label.field-bold span:first-child{ font-weight:700; }
+  .field-label.field-bold .field-value,
+  .field-label.field-bold .field-value-input{ font-weight:700; }
+  .field-value-input.fuel-warn,
+  .field-value-fixed.fuel-warn{ color:var(--red) !important; }
+  .wind-toggle-row{
+    display:flex; justify-content:flex-start; margin-top:10px;
+  }
+  .wind-toggle{
+    display:inline-flex;
+  }
+  .wind-toggle button{
+    font-family:var(--sans); font-size:11px; font-weight:700; letter-spacing:0.04em;
+    text-transform:uppercase; color:var(--muted); background:var(--panel-2);
+    border:1px solid var(--line); padding:2px 8px; cursor:pointer; transition:all .15s;
+  }
+  .wind-toggle button.hw{ border-radius:999px 0 0 999px; }
+  .wind-toggle button.tw{ border-radius:0 999px 999px 0; margin-left:-1px; }
+  .wind-toggle button.active{ position:relative; z-index:1; }
+  .wind-toggle button.active.hw{ color:var(--teal); border-color:var(--teal); }
+  .wind-toggle button.active.tw{ color:var(--red); border-color:var(--red); }
+
+  .readout{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:20px 18px;
+    margin-bottom:14px;
+  }
+  .readout-row{
+    display:flex; flex-direction:column; align-items:flex-start; gap:20px;
+  }
+  .readout-row:last-child{border-bottom:none;}
+  .readout-label{font-size:13px; color:var(--muted);}
+  .readout-value{
+    font-family:var(--mono); font-size:22px; font-weight:700; color:var(--text);
+  }
+  .readout-value.hero{color:var(--text); font-size:30px;}
+  .readout-value.big{font-size:30px;}
+  .unit{font-size:13px; color:var(--muted); font-weight:400; margin-left:3px;}
+  .unit.unit-primary{color:var(--text); margin-left:8px;}
+  .readout-label.readout-label-light{color:var(--text);}
+  .readout-value.hero{
+    display:inline-block; border-radius:8px; padding:4px 10px;
+    border:1px solid var(--line);
+    transition:background-color .2s, color .2s, border-color .2s;
+  }
+  .readout-value.hero.ok{background:rgba(74,222,128,0.12); color:var(--teal);}
+  .readout-value.hero.exceeds{background:rgba(226,86,79,0.15); color:var(--red);}
+  .readout-value.hero.pending{background:var(--panel-2); color:var(--muted);}
+  .readout-value.hero.ok .unit,
+  .readout-value.hero.exceeds .unit,
+  .readout-value.hero.pending .unit{color:inherit;}
+
+  .runway{
+    margin-top:20px; height:46px; position:relative;
+    background:var(--panel-2);
+    border-radius:6px; border:1px solid var(--line); overflow:hidden;
+  }
+  .readout-row + .runway{ margin-top:20px; }
+  /* Innerhalb einer .wx-subsection-divider sorgt deren eigener margin-top/padding-top
+     bereits für Abstand nach oben – der zusätzliche .runway-margin würde ihn verdoppeln. */
+  .wx-subsection-divider .runway{ margin-top:0; }
+  .runway-fill{
+    position:absolute; top:0; left:0; bottom:0;
+    background:var(--teal);
+    transition:width .2s, background-color .2s;
+  }
+  .runway-fill.exceeds{background:var(--red);}
+  .runway-total{
+    position:absolute; bottom:4px; right:8px; z-index:1;
+    font-family:var(--mono); font-size:11px; color:var(--text);
+  }
+  .fav-rwy-side{
+    position:absolute; top:50%; transform:translateY(-50%);
+    display:flex; align-items:center; gap:6px;
+    font-family:var(--mono); font-size:15px; font-weight:700; color:var(--text);
+    z-index:1;
+  }
+  .fav-rwy-left{ left:8px; }
+  .fav-rwy-right{ right:8px; }
+  .fav-rwy-wind{ font-size:13px; font-weight:600; color:var(--text); white-space:nowrap; }
+  .fav-rwy-wind .cwc-high{ color:var(--red); }
+  .fav-rwy-vrb{
+    position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+    font-family:var(--mono); font-size:15px; font-weight:700; color:var(--text);
+  }
+  .runway-favored{ color:var(--teal) !important; }
+
+  .note{
+    font-size:13px; line-height:1.6; color:var(--muted);
+    padding:14px 16px; background:var(--panel-2);
+    border-radius:8px;
+    margin-bottom:14px;
+  }
+  .note.warn{
+    background:rgba(226,86,79,0.18);
+    border:1px solid var(--line);
+  }
+  .note b{color:var(--text);}
+  .readout-note{
+    font-size:11px; line-height:1.6; color:var(--muted);
+    margin-top:20px; padding-top:16px;
+    border-top:1px solid var(--line);
+  }
+
+  .view.hidden{display:none;}
+  .view{ animation:view-fade-in 0.22s ease; }
+  @keyframes view-fade-in{ from{opacity:0;} to{opacity:1;} }
+  @media (prefers-reduced-motion: reduce){
+    .view{ animation:none; }
+  }
+
+
+
+  body{padding-bottom:110px;}
+
+  .tabbar{
+    position:fixed; left:50%; bottom:22px; transform:translateX(-50%);
+    display:flex; gap:4px;
+    background:rgba(24,28,34,0.85);
+    -webkit-backdrop-filter:blur(16px); backdrop-filter:blur(16px);
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:6px;
+    box-shadow:0 8px 24px rgba(0,0,0,0.4);
+    z-index:100;
+  }
+  .tab{
+    position:relative;
+    background:transparent; border:none; cursor:pointer;
+    padding:10px 14px; border-radius:11px;
+    color:var(--muted); font-family:var(--sans); font-size:13px; font-weight:600;
+    transition:all .15s;
+  }
+  .tab.active{background:var(--amber); color:#241705;}
+  .tab-label{white-space:nowrap;}
+  .tab-notify-dot{
+    position:absolute; top:6px; right:8px;
+    width:7px; height:7px; border-radius:50%;
+    background:var(--red); border:1.5px solid var(--panel);
+  }
+  .tab-notify-dot.hidden{ display:none; }
+  .tab.active .tab-notify-dot{ border-color:var(--amber); }
+
+
+  .wx-link{
+    display:block; text-decoration:none;
+    background:var(--panel); border:1px solid var(--line); border-radius:14px;
+    padding:18px; margin-bottom:14px;
+  }
+  .wx-link-title{
+    font-size:17px; font-weight:650; color:var(--text); margin-bottom:4px;
+  }
+  .wx-link-title-row{
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .wx-link-title-row .wx-link-title{ margin-bottom:0; }
+  .wx-link-title-row-inline{ justify-content:flex-start; gap:8px; }
+  .notam-toggle{
+    background:none; border:none; padding:4px; margin:-4px;
+    color:var(--muted); cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .notam-toggle svg{
+    width:18px; height:18px; transition:transform .2s;
+  }
+  .notam-toggle.collapsed svg{ transform:rotate(-90deg); }
+  .wx-link-sub{
+    font-family:var(--mono); font-size:13px; color:var(--amber);
+  }
+
+  .wx-box{
+    background:var(--panel); border:1px solid var(--line); border-radius:14px;
+    padding:18px; margin-bottom:14px;
+  }
+  .wx-subsection-divider{
+    margin-top:18px; padding-top:18px; border-top:1px solid var(--line);
+  }
+  .wx-raw{
+    font-family:var(--mono); font-size:13px; line-height:1.7; color:var(--text);
+    margin-top:8px; word-break:break-word;
+  }
+  .wx-raw.error{ font-family:var(--sans); color:var(--muted); font-size:13px; line-height:1.5; }
+  .sk-wrap{ margin-top:2px; }
+  .sk-bar{
+    height:11px; border-radius:4px; margin-top:8px;
+    background:linear-gradient(90deg, var(--panel-2) 25%, var(--line) 37%, var(--panel-2) 63%);
+    background-size:400% 100%;
+    animation:sk-shimmer 1.4s ease infinite;
+  }
+  .sk-bar:first-child{ margin-top:0; }
+  .sk-bar-badge{ height:10px; width:30%; }
+  @keyframes sk-shimmer{ 0%{background-position:100% 0;} 100%{background-position:0 0;} }
+  .wx-time{ font-family:var(--mono); font-size:11px; color:var(--muted); margin-top:8px; }
+  .wx-time.stale{ color:var(--red); }
+  .wx-time.notice{ color:var(--red); font-weight:600; }
+  .notam-item{
+    font-family:var(--mono); font-size:13px; line-height:1.6; color:var(--text);
+    padding:10px 0; border-top:1px solid var(--line);
+  }
+  .notam-item:first-child{ border-top:none; padding-top:8px; }
+  .notam-cats{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:6px; }
+  .notam-badge{
+    font-family:var(--sans); font-size:11px; font-weight:700; letter-spacing:0.04em;
+    color:var(--amber); background:var(--panel-2); border:1px solid var(--line);
+    border-radius:999px; padding:2px 8px; text-transform:uppercase;
+  }
+  .flight-cat-badge{ color:var(--muted); }
+  .flight-cat-badge.vfr{ color:var(--teal); border-color:var(--teal); }
+  .flight-cat-badge.mvfr{ color:var(--amber); border-color:var(--amber-dim); }
+  .flight-cat-badge.ifr, .flight-cat-badge.lifr{ color:var(--red); border-color:var(--red); }
+  .flight-cat-badge.stale-metar{ opacity:0.55; }
+  .status-badge{ color:var(--red) !important; font-size:11px !important; padding:2px 8px !important; display:inline-block; width:96px; text-align:center; }
+  .status-badge.ready{ color:var(--teal) !important; border-color:var(--teal); }
+  .status-badge.incomplete{ color:var(--red) !important; border-color:var(--red); }
+  .status-link{
+    display:inline-flex; align-items:center;
+    background:none; border:none; padding:2px; margin:-2px;
+    cursor:pointer; font:inherit; color:inherit;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .status-link:active .status-badge{ opacity:0.7; }
+  .status-chevron{ color:var(--muted); display:inline-flex; align-items:center; justify-content:center; flex:none; }
+  .status-chevron svg{ width:16px; height:16px; display:block; }
+  .notam-id{ font-weight:400; color:var(--text); margin-bottom:4px; }
+  .notam-valid{ color:var(--text); font-weight:700; margin-bottom:4px; }
+  .notam-desc{ color:var(--text); }
+  .notam-alert{ color:var(--red); }
+  .refresh-btn{
+    width:100%; padding:12px 0; background:var(--panel);
+    border:1px solid var(--line); border-radius:11px;
+    color:var(--text); font-family:var(--sans); font-size:13px; font-weight:600;
+    cursor:pointer; margin-bottom:14px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+  }
+  .refresh-btn:active{ background:var(--panel-2); }
+  .refresh-time{ text-align:center; margin-top:4px; margin-bottom:0; }
+
+  .sun-box{
+    background:var(--panel); border:1px solid var(--line); border-radius:14px;
+    padding:18px; margin-bottom:14px;
+  }
+  .sun-row{
+    display:flex; flex-direction:row; align-items:center;
+    gap:20px; margin-top:14px;
+  }
+  .sun-item{
+    display:flex; align-items:center; gap:9px;
+  }
+  .sun-icon{ width:22px; height:22px; color:var(--text); flex-shrink:0; }
+  .sun-icon-flip{ transform:scaleY(-1); }
+  .sun-value{
+    font-family:var(--mono); font-size:15px; font-weight:600; color:var(--text);
+  }
+  .section-heading{
+    font-size:11px; text-transform:uppercase; letter-spacing:0.1em;
+    color:var(--muted); font-weight:600; margin:0 0 8px 4px;
+  }
+
+  .cg-chart-wrap{ margin-top:20px; }
+  .cg-svg{ width:100%; height:auto; display:block; overflow:visible; }
+  .cg-frame{ fill:none; stroke:var(--line); stroke-width:1; }
+  .cg-gridline{ stroke:var(--line); stroke-width:0.5; opacity:0.6; }
+  .cg-tick-label{ font-family:var(--mono); font-size:8px; fill:var(--muted); }
+  .cg-axis-label{ font-family:var(--mono); font-size:9px; fill:var(--muted); }
+  .cg-envelope{ fill:none; stroke:var(--muted); stroke-width:1.5; }
+  .cg-connector{ fill:none; stroke:var(--muted); stroke-width:1; }
+  .cg-point{ fill:var(--teal); transition:cx .15s, cy .15s; }
+  .cg-point.out-of-limits{ fill:var(--red); }
+  .cg-point-tag{
+    font-family:var(--mono); font-size:8px; font-weight:600;
+    fill:var(--teal); transition:x .15s, y .15s;
+  }
+  .cg-point-tag.out-of-limits{ fill:var(--red); }
+  .cg-status{
+    font-size:13px; line-height:1.6; color:var(--teal);
+    margin-top:10px; text-align:center;
+  }
+  .cg-status.out-of-limits{ color:var(--red); }
+
+  .disclaimer-overlay{
+    position:fixed; inset:0; z-index:1000;
+    background:rgba(8,10,13,0.92);
+    display:flex; align-items:center; justify-content:center;
+    padding:20px;
+  }
+  .disclaimer-overlay.hidden{ display:none; }
+  .disclaimer-box{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:18px;
+    max-width:440px;
+    width:100%;
+  }
+  .disclaimer-title{
+    font-size:17px; font-weight:650; color:var(--red);
+    margin:0 0 12px;
+  }
+  .disclaimer-text{
+    font-size:13px; line-height:1.6; color:var(--text);
+    margin:0 0 20px;
+  }
+  .disclaimer-btn{
+    width:100%; padding:12px 0; background:var(--panel);
+    border:1px solid var(--line); border-radius:11px;
+    color:var(--text); font-family:var(--sans); font-size:13px; font-weight:600;
+    cursor:pointer;
+  }
+  .disclaimer-btn:active{ background:var(--panel-2); }
+</style>
+</head>
+<body>
+
+<div class="disclaimer-overlay" id="disclaimerOverlay">
+  <div class="disclaimer-box">
+    <div class="disclaimer-title">Important Notice</div>
+    <div class="disclaimer-text">
+      This app is for demonstration purposes only. It is not intended for operational flight planning or flight operations. Calculations are unverified and may contain errors.<br><br>
+      Use at your own risk. No liability is accepted for any damages, losses, or consequences resulting from the use of this app.
+    </div>
+    <button class="disclaimer-btn" onclick="document.getElementById('disclaimerOverlay').classList.add('hidden')">I Understand</button>
+  </div>
+</div>
+
+<div class="wrap">
+
+<div id="view-home" class="view">
+
+  <header>
+    <div class="eyebrow" id="homeDate">Loading…</div>
+    <div class="wx-link-title-row wx-link-title-row-inline">
+      <h1 id="greeting">Good morning, Lou.</h1>
+      <button type="button" class="status-link" onclick="switchView('briefing')">
+        <span class="notam-badge flight-cat-badge" id="flightCategoryBadgeHome"></span>
+      </button>
+    </div>
+  </header>
+
+  <div class="panel">
+    <h2 class="title-large">Flight Information</h2>
+
+    <div class="field field-divider">
+      <div class="field-label"><span>Aircraft Registration</span>
+        <span class="field-value-wrap"><span class="field-value-fixed" id="fiRegistration">LX-AIB</span></span>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-label"><span>Departure Aerodrome</span>
+        <span class="field-value-wrap"><span class="field-value-fixed" id="fiDeparture">ELLX</span></span>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-label"><span>Destination Aerodrome</span>
+        <span class="field-value-wrap"><span class="field-value-fixed" id="fiDestination">ELLX</span></span>
+      </div>
+    </div>
+
+    <div class="field field-divider">
+      <div class="field-label"><span>Alternate Aerodrome</span>
+        <span class="field-value-wrap"><input type="text" class="field-value-input" id="fiAlternate" value="ELLX" maxlength="4" autocapitalize="characters" autocomplete="off" spellcheck="false" style="text-transform:uppercase;"></span>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-label"><span>POB</span>
+        <span class="field-value-wrap">
+          <button type="button" class="stepper-btn" id="fiPobMinus" aria-label="POB verringern">−</button>
+          <input type="number" class="field-value-input" id="fiPob" value="2" min="1" max="4" step="1" style="text-align:center;">
+          <button type="button" class="stepper-btn" id="fiPobPlus" aria-label="POB erhöhen">+</button>
+        </span>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-label"><span>Fuel Density (kg/L)</span>
+        <span class="field-value-wrap">
+          <button type="button" class="stepper-btn" id="fiFuelDensityMinus" aria-label="Fuel Density verringern">−</button>
+          <input type="number" class="field-value-input" id="fiFuelDensity" value="0.72" min="0.70" max="0.80" step="0.01" style="text-align:center;">
+          <button type="button" class="stepper-btn" id="fiFuelDensityPlus" aria-label="Fuel Density erhöhen">+</button>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2 class="title-large">Flight Planning Status</h2>
+
+    <div class="field">
+      <div class="field-label"><span>Fuel Planning</span>
+        <button type="button" class="field-value-wrap status-link" onclick="switchView('mb')">
+          <span class="notam-badge status-badge" id="statusFuelPlanning">–</span>
+          <span class="status-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"></polyline></svg></span>
+        </button>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-label"><span>Center of Gravity</span>
+        <button type="button" class="field-value-wrap status-link" onclick="switchView('mb')">
+          <span class="notam-badge status-badge" id="statusCG">–</span>
+          <span class="status-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"></polyline></svg></span>
+        </button>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-label"><span>Take-Off Performance</span>
+        <button type="button" class="field-value-wrap status-link" onclick="switchView('takeoff')">
+          <span class="notam-badge status-badge" id="statusTakeoff">–</span>
+          <span class="status-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"></polyline></svg></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <button class="refresh-btn" id="exportBtn">
+    <div>Export</div>
+  </button>
+
+</div>
+
+<div id="view-takeoff" class="view hidden">
+
+  <header>
+    <div class="eyebrow" id="takeoffDate">Loading…</div>
+    <h1>Take-Off Performance</h1>
+  </header>
+
+  <div class="panel">
+    <h2 class="title-large">Conditions</h2>
+
+    <div class="field">
+      <div class="field-label"><span>Pressure Altitude (ft)</span>
+        <span class="field-value-wrap">
+          <button type="button" class="stepper-btn" id="paMinus" aria-label="Pressure Altitude verringern">−</button>
+          <input type="number" class="field-value-input" id="paNum" value="1234" style="text-align:center;">
+          <button type="button" class="stepper-btn" id="paPlus" aria-label="Pressure Altitude erhöhen">+</button>
+        </span>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-label"><span>Outside Air Temperature (°C)</span>
+        <span class="field-value-wrap">
+          <button type="button" class="stepper-btn" id="oatMinus" aria-label="Outside Air Temperature verringern">−</button>
+          <input type="number" class="field-value-input" id="oatNum" value="20" style="text-align:center;">
+          <button type="button" class="stepper-btn" id="oatPlus" aria-label="Outside Air Temperature erhöhen">+</button>
+        </span>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-label"><span>Mass (lbs)</span>
+        <span class="field-value-wrap">
+          <button type="button" class="stepper-btn" id="wMinus" aria-label="Mass verringern">−</button>
+          <input type="number" class="field-value-input" id="wNum" value="2000" style="text-align:center;">
+          <button type="button" class="stepper-btn" id="wPlus" aria-label="Mass erhöhen">+</button>
+        </span>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-label">
+        <span>Wind Component (kt)</span>
+        <span class="field-value-wrap">
+          <button type="button" class="stepper-btn" id="windMinus" aria-label="Wind Component verringern">−</button>
+          <input type="number" class="field-value-input" id="windNum" value="0" style="text-align:center;">
+          <button type="button" class="stepper-btn" id="windPlus" aria-label="Wind Component erhöhen">+</button>
+        </span>
+      </div>
+      <div class="wind-toggle-row">
+        <span class="wind-toggle">
+          <button id="hwBtn" class="hw active">HW</button>
+          <button id="twBtn" class="tw">TW</button>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="readout">
+    <div class="readout-row">
+      <div class="readout-label readout-label-light">Take-Off Distance over 50 ft Barrier</div>
+      <div class="readout-value hero" id="distance">–<span class="unit unit-primary">m</span></div>
+    </div>
+    <div class="runway">
+      <div class="runway-fill" id="runwayFill" style="width:50%"></div>
+      <div class="runway-total">4002 m</div>
+    </div>
+    <div class="readout-note">
+      These values are based on POH Figure 5.9 and are valid for a paved, level, and dry runway with full engine power applied prior to brake release. Operation outside these conditions or the calibrated range is not accounted for and should be considered unsafe.
+    </div>
+  </div>
+
+</div>
+
+<div id="view-briefing" class="view hidden">
+  <header>
+    <div class="eyebrow" id="todayDate">Loading…</div>
+    <h1>Briefing</h1>
+  </header>
+
+  <button class="refresh-btn" onclick="loadBriefing()">
+    <div>Refresh</div>
+    <div class="wx-time refresh-time" id="refreshTime"></div>
+  </button>
+
+  <div class="wx-box">
+    <div class="wx-link-title">Aerodrome Overview</div>
+    <div class="sun-row">
+    <div class="sun-item">
+      <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="14" r="4"></circle>
+        <line x1="12" y1="2" x2="12" y2="5"></line>
+        <line x1="4.2" y1="8.2" x2="6.3" y2="10"></line>
+        <line x1="19.8" y1="8.2" x2="17.7" y2="10"></line>
+        <line x1="2" y1="20" x2="22" y2="20"></line>
+        <polyline points="9 6 12 3 15 6"></polyline>
+      </svg>
+      <span class="sun-value" id="sunrise">–</span>
+    </div>
+    <div class="sun-item">
+      <svg class="sun-icon sun-icon-flip" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="14" r="4"></circle>
+        <line x1="12" y1="2" x2="12" y2="5"></line>
+        <line x1="4.2" y1="8.2" x2="6.3" y2="10"></line>
+        <line x1="19.8" y1="8.2" x2="17.7" y2="10"></line>
+        <line x1="2" y1="20" x2="22" y2="20"></line>
+        <polyline points="9 6 12 3 15 6"></polyline>
+      </svg>
+      <span class="sun-value" id="sunset">–</span>
+    </div>
+    </div>
+
+    <div class="wx-subsection-divider">
+      <div class="runway">
+        <div class="fav-rwy-side fav-rwy-left">
+          <span id="favRunwayLeft">24</span>
+          <span class="fav-rwy-wind" id="favRunwayLeftWind"></span>
+        </div>
+        <div class="fav-rwy-side fav-rwy-right">
+          <span class="fav-rwy-wind" id="favRunwayRightWind"></span>
+          <span id="favRunwayRight">06</span>
+        </div>
+        <div class="fav-rwy-vrb" id="favRunwayVrb"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="wx-link-title-row wx-link-title-row-inline">
+      <div class="wx-link-title">METAR ELLX</div>
+      <span class="notam-badge flight-cat-badge" id="flightCategoryBadge"></span>
+    </div>
+    <div class="wx-raw" id="metarBox"><div class="sk-wrap"><div class="sk-bar" style="width:92%;"></div><div class="sk-bar" style="width:58%;"></div></div></div>
+
+    <div class="wx-subsection-divider">
+      <div class="wx-link-title">TAF ELLX</div>
+      <div class="wx-raw" id="tafBox"><div class="sk-wrap"><div class="sk-bar" style="width:92%;"></div><div class="sk-bar" style="width:58%;"></div></div></div>
+      <div class="wx-time" id="tafTime"></div>
+    </div>
+  </div>
+
+  <div class="wx-box">
+    <div class="wx-link-title-row">
+      <div class="wx-link-title">NOTAMS ELLX</div>
+      <button class="notam-toggle" id="notamToggleBtn" onclick="toggleNotamBox('notamList',null,'notamToggleBtn')" aria-label="Collapse NOTAMs">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
+    </div>
+    <div class="wx-raw" id="notamList"><div class="sk-wrap"><div class="sk-bar sk-bar-badge"></div><div class="sk-bar" style="width:88%;"></div></div></div>
+
+    <div class="wx-subsection-divider">
+      <div class="wx-link-title-row">
+        <div class="wx-link-title">NOTAMS <span id="notamAlternateTitle">----</span></div>
+        <button class="notam-toggle" id="notamToggleBtnAlternate" onclick="toggleNotamBox('notamListAlternate',null,'notamToggleBtnAlternate')" aria-label="Collapse NOTAMs">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </button>
+      </div>
+      <div class="wx-raw" id="notamListAlternate"><div class="sk-wrap"><div class="sk-bar sk-bar-badge"></div><div class="sk-bar" style="width:88%;"></div></div></div>
+    </div>
+
+    <div class="wx-subsection-divider">
+      <div class="wx-link-title-row">
+        <div class="wx-link-title">NOTAMS EBBU FIR</div>
+        <button class="notam-toggle" id="notamToggleBtnEbbu" onclick="toggleNotamBox('notamListEbbu','notamTimeEbbu','notamToggleBtnEbbu')" aria-label="Collapse NOTAMs">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </button>
+      </div>
+      <div class="wx-raw" id="notamListEbbu"><div class="sk-wrap"><div class="sk-bar sk-bar-badge"></div><div class="sk-bar" style="width:88%;"></div></div></div>
+      <div class="wx-time" id="notamTimeEbbu"></div>
+    </div>
+  </div>
+
+</div>
+
+<div id="view-mb" class="view hidden">
+
+  <header>
+    <div class="eyebrow" id="mbDate">Loading…</div>
+    <h1>Mass &amp; Balance</h1>
+  </header>
+
+  <div class="panel" id="panelFuelPlanning">
+    <h2 class="title-large">Fuel Planning</h2>
+
+    <div class="field">
+      <div class="field-label"><span>Taxi Fuel</span>
+        <span class="field-value-wrap"><input type="number" class="field-value-input" id="fuelTaxi" value="10" min="10" max="50" step="1"><span class="field-value-unit">L</span></span>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-label"><span>Trip Fuel</span>
+        <span class="field-value-wrap"><input type="number" class="field-value-input" id="fuelTrip" value="0" min="35" max="100" step="1"><span class="field-value-unit">L</span></span>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-label"><span>Contingency Fuel</span>
+        <span class="field-value-wrap"><span class="field-value-fixed" id="fuelContingency">0</span><span class="field-value-unit">L</span></span>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-label"><span>Final Reserve Fuel</span>
+        <span class="field-value-wrap"><span class="field-value-fixed" id="fuelFinalReserve">27</span><span class="field-value-unit">L</span></span>
+      </div>
+    </div>
+
+    <div class="field field-divider">
+      <div class="field-label"><span>Alternate Fuel (<span id="mbAlternateAerodromeLabel">ELLX</span>)</span>
+        <span class="field-value-wrap"><input type="number" class="field-value-input" id="fuelAlternate" value="0" min="0" max="35" step="1"><span class="field-value-unit">L</span></span>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-label"><span>Minimum Fuel</span>
+        <span class="field-value-wrap"><span class="field-value-fixed" id="fuelMinimum">0</span><span class="field-value-unit">L</span></span>
+      </div>
+    </div>
+
+    <div class="field field-divider">
+      <div class="field-label"><span>Extra Fuel</span>
+        <span class="field-value-wrap"><input type="number" class="field-value-input" id="fuelExtra" value="0" min="0" max="100" step="1"><span class="field-value-unit">L</span></span>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-label field-bold"><span>Total Fuel</span>
+        <span class="field-value-wrap"><input type="number" class="field-value-input" id="fuelTotal" value="0" min="0" step="1"><span class="field-value-unit">L</span></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" id="panelCenterOfGravity">
+    <h2 class="title-large">Center of Gravity</h2>
+
+    <div class="field">
+      <div class="field-label"><span>Seat 1</span>
+        <span class="field-value-wrap"><input type="number" class="field-value-input" id="mbSeat1" value="0" min="0" max="150" step="1"><span class="field-value-unit">kg</span></span>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-label"><span>Seat 2</span>
+        <span class="field-value-wrap"><input type="number" class="field-value-input" id="mbSeat2" value="0" min="0" max="150" step="1"><span class="field-value-unit">kg</span></span>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-label"><span>Seat 3</span>
+        <span class="field-value-wrap"><input type="number" class="field-value-input" id="mbSeat3" value="0" min="0" max="150" step="1"><span class="field-value-unit">kg</span></span>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-label"><span>Seat 4</span>
+        <span class="field-value-wrap"><input type="number" class="field-value-input" id="mbSeat4" value="0" min="0" max="150" step="1"><span class="field-value-unit">kg</span></span>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-label"><span>Baggage</span>
+        <span class="field-value-wrap"><input type="number" class="field-value-input" id="mbBaggage" value="0" min="0" max="100" step="1"><span class="field-value-unit">kg</span></span>
+      </div>
+    </div>
+
+    <div class="field field-divider">
+      <div class="field-label"><span>Fuel (<span id="mbFuelDensityLabel1">0.72</span> kg/L)</span>
+        <span class="field-value-wrap"><span class="field-value-fixed" id="mbFuel">0.0</span><span class="field-value-unit">kg</span></span>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-label field-bold"><span>Ramp Mass</span>
+        <span class="field-value-wrap"><span class="field-value-fixed" id="mbRampMass">647.0</span><span class="field-value-unit">kg</span></span>
+      </div>
+    </div>
+
+    <div class="field field-divider">
+      <div class="field-label field-bold"><span>Center of Gravity</span>
+        <span class="field-value-wrap"><span class="field-value-fixed" id="mbRampCG">211.2</span><span class="field-value-unit">cm</span></span>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-label field-bold"><span>Take-Off Mass</span>
+        <span class="field-value-wrap"><span class="field-value-fixed" id="mbTakeoffMass">647.0</span><span class="field-value-unit">kg</span></span>
+      </div>
+    </div>
+
+    <div class="field field-divider">
+      <div class="field-label field-bold"><span>Center of Gravity</span>
+        <span class="field-value-wrap"><span class="field-value-fixed" id="mbTakeoffCG">211.2</span><span class="field-value-unit">cm</span></span>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-label field-bold"><span>Landing Mass</span>
+        <span class="field-value-wrap"><span class="field-value-fixed" id="mbLandingMass">647.0</span><span class="field-value-unit">kg</span></span>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-label field-bold"><span>Center of Gravity</span>
+        <span class="field-value-wrap"><span class="field-value-fixed" id="mbLandingCG">211.2</span><span class="field-value-unit">cm</span></span>
+      </div>
+    </div>
+
+    <div class="field field-divider">
+      <div class="field-label field-bold"><span>Remaining Fuel (<span id="mbFuelDensityLabel2">0.72</span> kg/L)</span>
+        <span class="field-value-wrap"><span class="field-value-fixed" id="mbRemainingFuel">0.0</span><span class="field-value-unit">kg</span></span>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-label field-bold"><span>Zero Fuel Mass</span>
+        <span class="field-value-wrap"><span class="field-value-fixed" id="mbZeroFuelMass">647.0</span><span class="field-value-unit">kg</span></span>
+      </div>
+    </div>
+
+    <div class="field field-divider">
+      <div class="field-label field-bold"><span>Center of Gravity</span>
+        <span class="field-value-wrap"><span class="field-value-fixed" id="mbZeroFuelCG">211.2</span><span class="field-value-unit">cm</span></span>
+      </div>
+    </div>
+
+    <div class="cg-chart-wrap">
+      <svg class="cg-svg" viewBox="0 0 300 220" id="cgChart">
+        <rect class="cg-frame" x="36" y="25" width="228" height="170"></rect>
+
+        <line class="cg-gridline" x1="62.1" y1="25" x2="62.1" y2="195"></line>
+        <line class="cg-gridline" x1="94.6" y1="25" x2="94.6" y2="195"></line>
+        <line class="cg-gridline" x1="127.2" y1="25" x2="127.2" y2="195"></line>
+        <line class="cg-gridline" x1="159.8" y1="25" x2="159.8" y2="195"></line>
+        <line class="cg-gridline" x1="192.3" y1="25" x2="192.3" y2="195"></line>
+        <line class="cg-gridline" x1="224.9" y1="25" x2="224.9" y2="195"></line>
+        <line class="cg-gridline" x1="257.5" y1="25" x2="257.5" y2="195"></line>
+
+        <line class="cg-gridline" x1="36" y1="188.5" x2="264" y2="188.5"></line>
+        <line class="cg-gridline" x1="36" y1="155.8" x2="264" y2="155.8"></line>
+        <line class="cg-gridline" x1="36" y1="123.1" x2="264" y2="123.1"></line>
+        <line class="cg-gridline" x1="36" y1="90.4" x2="264" y2="90.4"></line>
+        <line class="cg-gridline" x1="36" y1="57.7" x2="264" y2="57.7"></line>
+
+        <text class="cg-tick-label" x="62.1" y="204" text-anchor="middle">210</text>
+        <text class="cg-tick-label" x="94.6" y="204" text-anchor="middle">215</text>
+        <text class="cg-tick-label" x="127.2" y="204" text-anchor="middle">220</text>
+        <text class="cg-tick-label" x="159.8" y="204" text-anchor="middle">225</text>
+        <text class="cg-tick-label" x="192.3" y="204" text-anchor="middle">230</text>
+        <text class="cg-tick-label" x="224.9" y="204" text-anchor="middle">235</text>
+        <text class="cg-tick-label" x="257.5" y="204" text-anchor="middle">240</text>
+
+        <text class="cg-tick-label" x="31" y="191.5" text-anchor="end">600</text>
+        <text class="cg-tick-label" x="31" y="158.8" text-anchor="end">700</text>
+        <text class="cg-tick-label" x="31" y="126.1" text-anchor="end">800</text>
+        <text class="cg-tick-label" x="31" y="93.4" text-anchor="end">900</text>
+        <text class="cg-tick-label" x="31" y="60.7" text-anchor="end">1000</text>
+        <text class="cg-tick-label" x="31" y="28" text-anchor="end">1100</text>
+
+        <text class="cg-axis-label" x="150" y="217" text-anchor="middle">CG (cm)</text>
+        <text class="cg-axis-label" x="0" y="0" text-anchor="middle" transform="rotate(-90 9 110) translate(9 110)">Mass (kg)</text>
+
+        <polygon class="cg-envelope" points="67.3,180.3 67.3,95.5 133.7,39.7 232.7,39.7 232.7,180.3"></polygon>
+
+        <polyline class="cg-connector" id="cgConnector" points=""></polyline>
+
+        <circle class="cg-point" id="cgPointTakeoff" cx="69.8" cy="173.2" r="4"></circle>
+        <text class="cg-point-tag" id="cgTagTakeoff" x="75.8" y="176.2">T/O</text>
+
+        <circle class="cg-point" id="cgPointLanding" cx="69.8" cy="173.2" r="4"></circle>
+        <text class="cg-point-tag" id="cgTagLanding" x="75.8" y="176.2">LDG</text>
+
+        <circle class="cg-point" id="cgPointZeroFuel" cx="69.8" cy="173.2" r="4"></circle>
+        <text class="cg-point-tag" id="cgTagZeroFuel" x="75.8" y="176.2">ZFM</text>
+      </svg>
+      <div class="cg-status" id="cgStatus">Within CG limits</div>
+    </div>
+  </div>
+
+</div>
+
+</div>
+
+<nav class="tabbar">
+  <button class="tab active" id="tabHome" onclick="switchView('home')">
+    <span class="tab-label">Home</span>
+  </button>
+  <button class="tab" id="tabBriefing" onclick="switchView('briefing')">
+    <span class="tab-label">Briefing</span>
+    <span class="tab-notify-dot" id="briefingNotifyDot"></span>
+  </button>
+  <button class="tab" id="tabMB" onclick="switchView('mb')">
+    <span class="tab-label">M&amp;B</span>
+  </button>
+  <button class="tab" id="tabTakeoff" onclick="switchView('takeoff')">
+    <span class="tab-label">Take-Off</span>
+  </button>
+</nav>
+
+<script>
+  // Bleibt false, bis die Take-Off-Seite mindestens einmal geöffnet wurde. Erst dann
+  // darf der Status auf der Home-Seite auf "Complete" (grün) springen.
+  let takeoffVisited = false;
+
+  function switchView(view){
+    document.getElementById('view-home').classList.toggle('hidden', view!=='home');
+    document.getElementById('view-takeoff').classList.toggle('hidden', view!=='takeoff');
+    document.getElementById('view-briefing').classList.toggle('hidden', view!=='briefing');
+    document.getElementById('view-mb').classList.toggle('hidden', view!=='mb');
+    document.getElementById('tabHome').classList.toggle('active', view==='home');
+    document.getElementById('tabTakeoff').classList.toggle('active', view==='takeoff');
+    document.getElementById('tabBriefing').classList.toggle('active', view==='briefing');
+    document.getElementById('tabMB').classList.toggle('active', view==='mb');
+    // Briefing wird bewusst NICHT bei jedem Tab-Wechsel neu geladen (nur beim ersten
+    // Öffnen der App bzw. per manuellem Refresh-Button), damit sich METAR-abgeleitete
+    // Werte (OAT, PA, Wind) nicht unbemerkt im Hintergrund ändern.
+    if(view==='briefing'){ setGreeting(); }
+    if(view==='takeoff' && !takeoffVisited){
+      takeoffVisited = true;
+      updateStatusBadges();
+    }
+  }
+
+  function setGreeting(){
+    const h = new Date().getHours();
+    let g = 'Good evening';
+    if(h >= 2 && h < 12) g = 'Good morning';
+    else if(h >= 12 && h < 18) g = 'Good afternoon';
+    document.getElementById('greeting').textContent = g + ', Lou.';
+
+    updateEyebrowDateTime();
+  }
+
+  // Datum + live Zulu-/UTC-Zeit für alle Seiten (relevant für Briefings, NOTAMs, METAR-Zeiten)
+  function updateEyebrowDateTime(){
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('en-US', {weekday:'long', month:'long', day:'numeric'});
+    const hh = String(now.getUTCHours()).padStart(2, '0');
+    const mm = String(now.getUTCMinutes()).padStart(2, '0');
+    const dateTimeStr = dateStr + ' · ' + hh + ':' + mm + 'Z';
+
+    document.getElementById('homeDate').textContent = dateTimeStr;
+    document.getElementById('todayDate').textContent = dateTimeStr;
+    document.getElementById('mbDate').textContent = dateTimeStr;
+    document.getElementById('takeoffDate').textContent = dateTimeStr;
+  }
+
+  setInterval(updateEyebrowDateTime, 15000);
+  // Relativer Pfad: funktioniert automatisch mit localhost UND später mit der Render-URL
+  const WX_API = '/api/wx/ellx';
+  const EBBU_NOTAM_API = '/api/notams/EBBU';
+  const SKELETON_WIDTHS = ['92%', '58%', '75%'];
+  const FETCH_TIMEOUT_MS = 10000;
+
+  // M&B-Konstanten stehen hier (statt weiter unten bei den anderen M&B-Deklarationen),
+  // weil applyPobToSeats() weiter unten sofort beim Laden aufgerufen wird und darüber
+  // computeMB()/setMassCG() erreicht – dort dürfen sie nicht mehr im TDZ stecken.
+  const TOTAL_FUEL_CAPACITY_L = 180; // nutzbare Tankmenge lt. POH LX-AIB
+  const CG_AFT_LIMIT = 236.2;
+  function cgForwardLimitAtMass(mass){
+    if(mass <= 884.5) return 210.8;
+    if(mass >= 1055.0) return 221.0;
+    const t = (mass - 884.5) / (1055.0 - 884.5);
+    return 210.8 + t * (221.0 - 210.8);
+  }
+
+  setGreeting();
+  // loadBriefing() wird erst ganz am Ende des Scripts aufgerufen (siehe unten), nachdem
+  // alle von ihm benötigten let/const-Deklarationen (u.a. lastFetchedAt, ebbuFetchedAt,
+  // alternateNotamFetchedAt) ausgeführt wurden – sonst ReferenceError durch TDZ.
+
+  function escapeHtml(str){
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  // Skeleton-Loader statt "Loading Data..."-Text während Wetter-/NOTAM-Daten geladen werden.
+  function skeletonBars(count){
+    let html = '<div class="sk-wrap">';
+    for(let i=0;i<count;i++){
+      html += '<div class="sk-bar" style="width:' + SKELETON_WIDTHS[i % SKELETON_WIDTHS.length] + ';"></div>';
+    }
+    html += '</div>';
+    return html;
+  }
+  function skeletonNotamCard(){
+    return '<div class="sk-wrap"><div class="sk-bar sk-bar-badge"></div><div class="sk-bar" style="width:88%;"></div></div>';
+  }
+
+  // Bricht einen Fetch nach timeoutMs ab, damit der Skeleton-Loader nicht unbegrenzt
+  // pulsiert, falls der Server bzw. die Quelle (MeteoLux/speedbird) hängt.
+  function fetchWithTimeout(url, options = {}, timeoutMs = FETCH_TIMEOUT_MS){
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    return fetch(url, {...options, signal: controller.signal}).finally(() => clearTimeout(timer));
+  }
+
+  function highlightNotamAlerts(str){
+    const escaped = escapeHtml(str);
+    return escaped.replace(/\b(U\/S|CLSD)\b/gi, '<span class="notam-alert">$1</span>');
+  }
+
+  // Färbt signifikante Wettergruppen im METAR/TAF-Rohtext rot ein: TS (Thunderstorm),
+  // SQ (Squall), FZ (Freezing), CB/TCU (Cumulonimbus/Towering Cumulus) stecken meist
+  // ohne Leerzeichen in einer größeren Gruppe (z.B. "TSRA", "BKN030CB") – daher ohne
+  // Wortgrenzen. G (Gust) wird nur zwischen Ziffern erkannt (z.B. "24015G25KT"),
+  // damit nicht versehentlich andere Buchstaben getroffen werden.
+  function highlightMetarTerms(str){
+    if(!str) return escapeHtml(str || '');
+    const escaped = escapeHtml(str);
+    return escaped
+      .replace(/(TCU|CB|TS|SQ|FZ)/g, '<span class="notam-alert">$1</span>')
+      .replace(/(?<=\d)G(?=\d)/g, '<span class="notam-alert">G</span>');
+  }
+
+  // timeId wird nicht mehr zum Ein-/Ausblenden genutzt: der Zeitstempel soll auch bei
+  // eingeklappter Box immer sichtbar bleiben. Parameter bleibt aus Kompatibilitätsgründen erhalten.
+  function toggleNotamBox(listId, timeId, btnId){
+    const list = document.getElementById(listId);
+    const btn = document.getElementById(btnId);
+    const collapsed = btn.classList.toggle('collapsed');
+    list.style.display = collapsed ? 'none' : '';
+    btn.setAttribute('aria-label', collapsed ? 'Expand NOTAMs' : 'Collapse NOTAMs');
+  }
+
+  function angularDiff(a, b){
+    const d = Math.abs(a - b) % 360;
+    return d > 180 ? 360 - d : d;
+  }
+
+  // Liest die Temperatur (°C) aus der Temperatur/Taupunkt-Gruppe des METAR, z.B. "18/12" oder "M02/M05"
+  function parseMetarTemp(metarRaw){
+    if(!metarRaw) return null;
+    const m = metarRaw.match(/\s(M?\d{2})\/(M?\d{2})\s+(?:Q|A)\d{3,4}\b/);
+    if(!m) return null;
+    return parseInt(m[1].replace('M', '-'), 10);
+  }
+
+  // Übernimmt die METAR-Temperatur als Referenzwert. Ist kein Wert verfügbar,
+  // wird 0°C gesetzt und rot markiert.
+  function applyMetarOAT(metarRaw){
+    const oatNum = document.getElementById('oatNum');
+    if(!oatNum) return;
+
+    const temp = parseMetarTemp(metarRaw);
+    if(temp === null || isNaN(temp)){
+      oatNum.value = 0;
+      oatNum.classList.add('fuel-warn');
+      if(typeof refreshStepperButtons === 'function') refreshStepperButtons('oat');
+      if(typeof calc === 'function') calc();
+      return;
+    }
+
+    oatNum.classList.remove('fuel-warn');
+    const clamped = Math.max(-20, Math.min(40, temp));
+    oatNum.value = clamped;
+    if(typeof refreshStepperButtons === 'function') refreshStepperButtons('oat');
+    if(typeof calc === 'function') calc();
+  }
+
+  // Liest das QNH aus dem METAR, z.B. "Q1015" (hPa) oder "A2992" (inHg, wird in hPa umgerechnet)
+  function parseMetarQNH(metarRaw){
+    if(!metarRaw) return null;
+    let m = metarRaw.match(/\bQ(\d{4})\b/);
+    if(m) return parseInt(m[1], 10);
+    m = metarRaw.match(/\bA(\d{4})\b/);
+    if(m) return (parseInt(m[1], 10) / 100) * 33.8639;
+    return null;
+  }
+
+  const FIELD_ELEVATION_FT = 1234;
+
+  // Pressure Altitude = Feldhöhe + (1013 - QNH) * 27 ft/hPa.
+  // Ist kein QNH aus dem METAR verfügbar, wird 0 ft gesetzt und rot markiert.
+  function applyMetarPA(metarRaw){
+    const paNum = document.getElementById('paNum');
+    if(!paNum) return;
+
+    const qnh = parseMetarQNH(metarRaw);
+    if(qnh === null || isNaN(qnh)){
+      paNum.value = 0;
+      paNum.classList.add('fuel-warn');
+      if(typeof refreshStepperButtons === 'function') refreshStepperButtons('pa');
+      if(typeof calc === 'function') calc();
+      return;
+    }
+
+    paNum.classList.remove('fuel-warn');
+    let pa = FIELD_ELEVATION_FT + (1013 - qnh) * 27;
+    pa = Math.round(pa);
+    const clamped = Math.max(0, Math.min(4000, pa));
+    paNum.value = clamped;
+    if(typeof refreshStepperButtons === 'function') refreshStepperButtons('pa');
+    if(typeof calc === 'function') calc();
+  }
+
+  let favHeadwindKt = null; // errechneter Headwind der bevorzugten Landebahn (Home-Seite)
+
+  function updateFavRunway(metarRaw){
+    const left = document.getElementById('favRunwayLeft');
+    const right = document.getElementById('favRunwayRight');
+    const leftWindEl = document.getElementById('favRunwayLeftWind');
+    const rightWindEl = document.getElementById('favRunwayRightWind');
+    const vrbEl = document.getElementById('favRunwayVrb');
+
+    left.classList.remove('runway-favored');
+    right.classList.remove('runway-favored');
+    leftWindEl.textContent = '';
+    rightWindEl.textContent = '';
+    vrbEl.textContent = '';
+    favHeadwindKt = null;
+
+    if(!metarRaw) return;
+
+    const tokens = metarRaw.trim().split(/\s+/);
+    const windToken = tokens[3] || ''; // 4. Wert im METAR = Wind
+    const m = windToken.match(/^(\d{3}|VRB)(\d{2,3})(G\d{2,3})?KT$/);
+    if(!m) return;
+
+    const windSpeed = parseInt(m[2], 10);
+
+    if(m[1] === 'VRB'){
+      vrbEl.textContent = 'VRB ' + windSpeed + ' kt';
+      return;
+    }
+
+    const windDir = parseInt(m[1], 10);
+    const diff24 = angularDiff(windDir, 240);
+    const diff06 = angularDiff(windDir, 60);
+
+    function windLabel(headwind, crosswind){
+      const cwcText = crosswind + ' kt XW';
+      const cwcHtml = crosswind > 17 ? '<span class="cwc-high">' + cwcText + '</span>' : cwcText;
+      return '(' + headwind + ' kt HW and ' + cwcHtml + ')';
+    }
+
+    if(diff24 < diff06){
+      left.classList.add('runway-favored');
+      const headwind = Math.round(windSpeed * Math.cos(diff24 * Math.PI / 180));
+      const crosswind = Math.round(windSpeed * Math.sin(diff24 * Math.PI / 180));
+      leftWindEl.innerHTML = windLabel(headwind, crosswind);
+      favHeadwindKt = headwind;
+    } else if(diff06 < diff24){
+      right.classList.add('runway-favored');
+      const headwind = Math.round(windSpeed * Math.cos(diff06 * Math.PI / 180));
+      const crosswind = Math.round(windSpeed * Math.sin(diff06 * Math.PI / 180));
+      rightWindEl.innerHTML = windLabel(headwind, crosswind);
+      favHeadwindKt = headwind;
+    }
+  }
+
+  // Übernimmt den auf der Home-Seite errechneten Headwind als Referenzwert für den Wind-Regler.
+  // Ist kein Wert verfügbar, wird 0 kt gesetzt und rot markiert.
+  function applyHomeWindDefault(){
+    const windNum = document.getElementById('windNum');
+    const hwBtn = document.getElementById('hwBtn');
+    const twBtn = document.getElementById('twBtn');
+    if(!windNum || !hwBtn || !twBtn) return;
+
+    hwBtn.classList.add('active');
+    twBtn.classList.remove('active');
+
+    if(favHeadwindKt === null || isNaN(favHeadwindKt)){
+      windNum.value = 0;
+      windNum.classList.add('fuel-warn');
+      if(typeof refreshStepperButtons === 'function') refreshStepperButtons('wind');
+      if(typeof calc === 'function') calc();
+      return;
+    }
+
+    windNum.classList.remove('fuel-warn');
+    const clamped = Math.max(0, Math.min(15, favHeadwindKt));
+    windNum.value = clamped;
+    if(typeof refreshStepperButtons === 'function') refreshStepperButtons('wind');
+
+    if(typeof calc === 'function') calc();
+  }
+
+  const NOTAM_CATEGORY_ORDER = [
+    {keys:['RWY','TWY','RUNWAY','TAXIWAY'], rank:0},
+    {keys:['NAV'], rank:1},
+    {keys:['FAC'], rank:2},
+    {keys:['PROC'], rank:3},
+    {keys:['OBST','OBS'], rank:4},
+  ];
+
+  function notamRank(n){
+    const cats = (typeof n === 'string') ? [] : (n.categories || []);
+    let best = 99;
+    cats.forEach(c => {
+      const upper = c.toUpperCase();
+      NOTAM_CATEGORY_ORDER.forEach(group => {
+        if(group.keys.some(k => upper.includes(k)) && group.rank < best) best = group.rank;
+      });
+    });
+    return best;
+  }
+
+  // Rendert eine sortierte NOTAM-Liste in den übergebenen Container (wird von ELLX- und EBBU-Box genutzt)
+  function renderNotamList(container, notams){
+    if(!notams || !notams.length){
+      container.textContent = 'Keine aktiven NOTAMs gefunden';
+      return;
+    }
+
+    const sortedNotams = notams.slice().sort((a,b) => notamRank(a) - notamRank(b));
+
+    container.innerHTML = '';
+    sortedNotams.forEach(n => {
+      const raw = typeof n === 'string' ? n : n.raw;
+      const categories = typeof n === 'string' ? [] : (n.categories || []);
+
+      const combined = raw.match(/^(\S+\/\d{2})\s+Active\s+(.+?Z)\s*→\s*(.+?Z)\s+([\s\S]*)$/);
+      const idText = combined ? combined[1] : '';
+      const validText = combined ? ('Valid: ' + combined[2] + ' → ' + combined[3]) : '';
+      const descText = combined ? combined[4].trim() : raw;
+
+      const div = document.createElement('div');
+      div.className = 'notam-item';
+
+      if(categories.length){
+        const catRow = document.createElement('div');
+        catRow.className = 'notam-cats';
+        categories.forEach(c => {
+          const badge = document.createElement('span');
+          badge.className = 'notam-badge';
+          badge.textContent = c;
+          catRow.appendChild(badge);
+        });
+        div.appendChild(catRow);
+      }
+      if(idText){
+        const idRow = document.createElement('div');
+        idRow.className = 'notam-id';
+        idRow.textContent = idText;
+        div.appendChild(idRow);
+      }
+      if(validText){
+        const validRow = document.createElement('div');
+        validRow.className = 'notam-valid';
+        validRow.textContent = validText;
+        div.appendChild(validRow);
+      }
+      const descRow = document.createElement('div');
+      descRow.className = 'notam-desc';
+      descRow.innerHTML = highlightNotamAlerts(descText);
+      div.appendChild(descRow);
+
+      container.appendChild(div);
+    });
+  }
+
+  // Ermittelt die Flugwetterkategorie (VFR/MVFR/IFR/LIFR) aus Sicht und Wolkenuntergrenze im METAR.
+  // Sicht wird als Meter-Gruppe gelesen (europäisches METAR-Format) und in Statute Miles umgerechnet.
+  function computeFlightCategory(metarRaw){
+    if(!metarRaw) return null;
+
+    if(/\bCAVOK\b/.test(metarRaw)) return 'VFR';
+
+    // Sicht: eigenständige 4-stellige Zahl zwischen Leerzeichen (z.B. "9999"), keine Zeit-/Wind-/QNH-Gruppe
+    const visMatch = metarRaw.match(/(?:^|\s)(\d{4})(?=\s)/);
+    if(!visMatch) return null;
+    const visSM = parseInt(visMatch[1], 10) / 1609.344 * 1000;
+
+    // Ceiling: niedrigste BKN/OVC-Schicht oder Vertical Visibility, in ft
+    let ceilingFt = Infinity;
+    const cloudRe = /\b(?:BKN|OVC|VV)(\d{3})\b/g;
+    let m;
+    while((m = cloudRe.exec(metarRaw)) !== null){
+      const ft = parseInt(m[1], 10) * 100;
+      if(ft < ceilingFt) ceilingFt = ft;
+    }
+
+    function ceilingCat(ft){
+      if(ft < 500) return 'LIFR';
+      if(ft < 1000) return 'IFR';
+      if(ft <= 3000) return 'MVFR';
+      return 'VFR';
+    }
+    function visCat(sm){
+      if(sm < 1) return 'LIFR';
+      if(sm < 3) return 'IFR';
+      if(sm <= 5) return 'MVFR';
+      return 'VFR';
+    }
+
+    const rank = {LIFR:3, IFR:2, MVFR:1, VFR:0};
+    const c1 = ceilingCat(ceilingFt);
+    const c2 = visCat(visSM);
+    return rank[c1] >= rank[c2] ? c1 : c2;
+  }
+
+  function updateFlightCategoryBadge(metarRaw){
+    const badges = document.querySelectorAll('.flight-cat-badge');
+    if(!badges.length) return;
+    const cat = computeFlightCategory(metarRaw);
+    badges.forEach(badge=>{
+      badge.classList.remove('vfr', 'mvfr', 'ifr', 'lifr');
+      if(!cat){
+        badge.textContent = '';
+        badge.style.display = 'none';
+        return;
+      }
+      badge.style.display = '';
+      badge.textContent = cat;
+      badge.classList.add(cat.toLowerCase());
+    });
+  }
+
+  async function loadEllxBriefing(){
+    const metarBox = document.getElementById('metarBox');
+    const tafBox = document.getElementById('tafBox');
+    const notamList = document.getElementById('notamList');
+    const tafTime = document.getElementById('tafTime');
+
+    metarBox.innerHTML = skeletonBars(2); metarBox.classList.remove('error');
+    tafBox.innerHTML = skeletonBars(2); tafBox.classList.remove('error');
+    notamList.innerHTML = skeletonNotamCard(); notamList.classList.remove('error');
+
+    const notamToggleBtn = document.getElementById('notamToggleBtn');
+    notamToggleBtn.classList.remove('collapsed');
+    notamToggleBtn.setAttribute('aria-label', 'Collapse NOTAMs');
+    notamToggleBtn.style.display = '';
+    notamList.style.display = '';
+
+    try{
+      const res = await fetchWithTimeout(WX_API, {cache:'no-store'});
+      if(!res.ok) throw new Error('HTTP '+res.status);
+      const data = await res.json();
+
+      lastFetchedAt = new Date(data.fetchedAt);
+      updateTimestamps();
+
+      metarBox.innerHTML = highlightMetarTerms(data.metar || 'No data available.');
+      updateFlightCategoryBadge(data.metar);
+      updateFavRunway(data.metar);
+      applyHomeWindDefault();
+      applyMetarOAT(data.metar);
+      applyMetarPA(data.metar);
+      tafBox.innerHTML = highlightMetarTerms(data.taf || 'No data available.');
+
+      renderNotamList(notamList, data.notams);
+
+    }catch(err){
+      metarBox.classList.add('error');
+      metarBox.textContent = 'Live data is currently not available.';
+      tafBox.classList.add('error');
+      tafBox.textContent = 'Live data is currently not available.';
+      notamList.classList.add('error');
+      notamList.textContent = 'Live data is currently not available.';
+      notamToggleBtn.style.display = 'none';
+      lastFetchedAt = null;
+      updateFlightCategoryBadge(null);
+      updateFavRunway(null);
+      applyHomeWindDefault();
+      applyMetarOAT(null);
+      applyMetarPA(null);
+      tafTime.textContent = '';
+      tafTime.classList.remove('stale');
+      const refreshTime = document.getElementById('refreshTime');
+      refreshTime.textContent = '';
+      refreshTime.classList.remove('stale', 'notice');
+      refreshTime.style.display = 'none';
+      updateTimestamps();
+    }
+  }
+
+  async function loadEbbuNotams(){
+    const notamList = document.getElementById('notamListEbbu');
+    const notamToggleBtn = document.getElementById('notamToggleBtnEbbu');
+
+    notamList.innerHTML = skeletonNotamCard(); notamList.classList.remove('error');
+    notamToggleBtn.classList.remove('collapsed');
+    notamToggleBtn.setAttribute('aria-label', 'Collapse NOTAMs');
+    notamToggleBtn.style.display = '';
+    notamList.style.display = '';
+
+    try{
+      const res = await fetchWithTimeout(EBBU_NOTAM_API, {cache:'no-store'});
+      if(!res.ok) throw new Error('HTTP '+res.status);
+      const data = await res.json();
+
+      ebbuFetchedAt = new Date(data.fetchedAt);
+      updateTimestamps();
+
+      renderNotamList(notamList, data.notams);
+
+    }catch(err){
+      notamList.classList.add('error');
+      notamList.textContent = 'Live data is currently not available.';
+      notamToggleBtn.style.display = 'none';
+      ebbuFetchedAt = null;
+      updateTimestamps();
+    }
+  }
+
+  // NOTAMs für den auf der Home-Seite eingetragenen Alternate Aerodrome (speedbird, wie ELLX/EBBU)
+  async function loadAlternateNotams(){
+    const icao = (document.getElementById('fiAlternate').value || '').toUpperCase();
+    document.getElementById('notamAlternateTitle').textContent = icao || '----';
+
+    const notamList = document.getElementById('notamListAlternate');
+    const notamToggleBtn = document.getElementById('notamToggleBtnAlternate');
+
+    if(!/^[A-Z]{4}$/.test(icao)){
+      notamList.classList.add('error');
+      notamList.textContent = 'Alternate aerodrome is not valid.';
+      notamToggleBtn.style.display = 'none';
+      alternateNotamFetchedAt = null;
+      updateTimestamps();
+      return;
+    }
+
+    notamList.innerHTML = skeletonNotamCard(); notamList.classList.remove('error');
+    notamToggleBtn.classList.remove('collapsed');
+    notamToggleBtn.setAttribute('aria-label', 'Collapse NOTAMs');
+    notamToggleBtn.style.display = '';
+    notamList.style.display = '';
+
+    try{
+      const res = await fetchWithTimeout('/api/notams/' + icao, {cache:'no-store'});
+      if(!res.ok) throw new Error('HTTP '+res.status);
+      const data = await res.json();
+
+      alternateNotamFetchedAt = new Date(data.fetchedAt);
+      updateTimestamps();
+
+      renderNotamList(notamList, data.notams);
+
+    }catch(err){
+      notamList.classList.add('error');
+      notamList.textContent = 'Live data is currently not available.';
+      notamToggleBtn.style.display = 'none';
+      alternateNotamFetchedAt = null;
+      updateTimestamps();
+    }
+  }
+
+  async function loadBriefing(){
+    await Promise.all([loadEllxBriefing(), loadEbbuNotams(), loadAlternateNotams()]);
+  }
+
+  let lastFetchedAt = null;
+  let ebbuFetchedAt = null;
+  let alternateNotamFetchedAt = null;
+
+  // Formatiert "vor X Minuten" bzw. ab 60 Minuten "vor 1 Stunde" / "vor 1 Stunde und 10 Minuten"
+  function formatMinutesAgo(mins){
+    if(mins < 1) return 'now';
+    if(mins < 60) return mins + ' minute' + (mins === 1 ? '' : 's') + ' ago';
+    const hours = Math.floor(mins / 60);
+    const rem = mins % 60;
+    const hourStr = hours + ' hour' + (hours === 1 ? '' : 's');
+    if(rem === 0) return hourStr + ' ago';
+    return hourStr + ' and ' + rem + ' minute' + (rem === 1 ? '' : 's') + ' ago';
+  }
+
+  function updateTimestamps(){
+    if(lastFetchedAt){
+      const mins = Math.floor(Date.now() / 60000) - Math.floor(lastFetchedAt.getTime() / 60000);
+      const label = mins < 1 ? 'Live' : formatMinutesAgo(mins);
+      const timeStr = lastFetchedAt.toLocaleTimeString('de-DE', {hour:'2-digit', minute:'2-digit'});
+      const text = label + ' · ' + timeStr;
+      const refreshLabel = mins < 1 ? 'Last refreshed now.' : ('Last refreshed ' + formatMinutesAgo(mins) + '.');
+      const stale = mins >= 30;
+
+      ['tafTime'].forEach(id => {
+        const el = document.getElementById(id);
+        el.textContent = text;
+        el.classList.toggle('stale', stale);
+      });
+
+      const refreshTime = document.getElementById('refreshTime');
+      refreshTime.style.display = '';
+
+      const newMetarLikely = isNewMetarLikely();
+      refreshTime.textContent = newMetarLikely ? 'New METAR may be available · Tap to refresh' : refreshLabel;
+      refreshTime.classList.toggle('stale', stale && !newMetarLikely);
+      refreshTime.classList.toggle('notice', newMetarLikely);
+    }
+
+    // Kombinierter Zeitstempel für die NOTAM-Box: zeigt die Abrufzeit, sobald mindestens
+    // eine der drei Kategorien (ELLX, Alternate, EBBU FIR) erfolgreich geladen wurde.
+    // Sind alle drei nicht verfügbar, bleibt die Zeile leer.
+    const notamTimeEl = document.getElementById('notamTimeEbbu');
+    const notamFetchTimes = [lastFetchedAt, alternateNotamFetchedAt, ebbuFetchedAt].filter(Boolean);
+    if(notamFetchTimes.length){
+      const mostRecent = new Date(Math.max(...notamFetchTimes.map(d => d.getTime())));
+      const mins = Math.floor(Date.now() / 60000) - Math.floor(mostRecent.getTime() / 60000);
+      const label = mins < 1 ? 'Live' : formatMinutesAgo(mins);
+      const timeStr = mostRecent.toLocaleTimeString('de-DE', {hour:'2-digit', minute:'2-digit'});
+      const stale = mins >= 30;
+
+      notamTimeEl.textContent = label + ' · ' + timeStr;
+      notamTimeEl.classList.toggle('stale', stale);
+    } else {
+      notamTimeEl.textContent = '';
+      notamTimeEl.classList.remove('stale');
+    }
+
+    checkNewMetarAvailable();
+  }
+  setInterval(updateTimestamps, 10000);
+
+  // METAR wird routinemäßig um :20 und :50 veröffentlicht. Liefert die letzte dieser
+  // Marken, die vor "now" liegt (inkl. Sprung in die Vorstunde, falls nötig).
+  function lastMetarPublishTime(now){
+    const boundary = new Date(now);
+    boundary.setSeconds(0, 0);
+    if(boundary.getMinutes() >= 50){
+      boundary.setMinutes(50);
+    } else if(boundary.getMinutes() >= 20){
+      boundary.setMinutes(20);
+    } else {
+      boundary.setHours(boundary.getHours() - 1);
+      boundary.setMinutes(50);
+    }
+    return boundary;
+  }
+
+  const METAR_PUBLISH_BUFFER_MIN = 2; // Puffer, da die Veröffentlichung nicht exakt auf :20/:50 fällt
+
+  // Prüft, ob seit dem letzten Abruf eine neue :20/:50-Marke (+ Puffer) vergangen ist.
+  function isNewMetarLikely(){
+    if(!lastFetchedAt) return false;
+    const now = new Date();
+    const boundary = lastMetarPublishTime(now);
+    const boundaryWithBuffer = new Date(boundary.getTime() + METAR_PUBLISH_BUFFER_MIN * 60000);
+    return boundaryWithBuffer <= now && lastFetchedAt < boundary;
+  }
+
+  // Zeigt/versteckt den Hinweis-Punkt auf dem Briefing-Tab sowie die gedimmte Darstellung
+  // der Flight-Category-Badges (Home + Briefing), passend zu isNewMetarLikely().
+  function checkNewMetarAvailable(){
+    const stale = isNewMetarLikely();
+
+    const dot = document.getElementById('briefingNotifyDot');
+    if(dot) dot.classList.toggle('hidden', !stale);
+
+    document.querySelectorAll('.flight-cat-badge').forEach(badge => {
+      badge.classList.toggle('stale-metar', stale);
+    });
+  }
+
+  // Sonnenauf-/-untergang für ELLX (49.6233°N, 6.2044°E) — astronomische Berechnung, läuft lokal
+  (function(){
+    const rad = Math.PI / 180;
+    const dayMs = 1000*60*60*24, J1970 = 2440588, J2000 = 2451545;
+    const e = rad * 23.4397;
+
+    function toJulian(date){ return date.valueOf()/dayMs - 0.5 + J1970; }
+    function fromJulian(j){ return new Date((j + 0.5 - J1970) * dayMs); }
+    function toDays(date){ return toJulian(date) - J2000; }
+    function declination(l){ return Math.asin(Math.sin(0)*Math.cos(e) + Math.cos(0)*Math.sin(e)*Math.sin(l)); }
+    function solarMeanAnomaly(d){ return rad * (357.5291 + 0.98560028 * d); }
+    function eclipticLongitude(M){
+      const C = rad * (1.9148*Math.sin(M) + 0.02*Math.sin(2*M) + 0.0003*Math.sin(3*M));
+      const P = rad * 102.9372;
+      return M + C + P + Math.PI;
+    }
+    function julianCycle(d, lw){ return Math.round(d - 0.0009 - lw/(2*Math.PI)); }
+    function approxTransit(Ht, lw, n){ return 0.0009 + (Ht + lw)/(2*Math.PI) + n; }
+    function solarTransitJ(ds, M, L){ return J2000 + ds + 0.0053*Math.sin(M) - 0.0069*Math.sin(2*L); }
+    function hourAngle(h, phi, dec){
+      return Math.acos((Math.sin(h) - Math.sin(phi)*Math.sin(dec)) / (Math.cos(phi)*Math.cos(dec)));
+    }
+
+    function getTimes(date, lat, lng){
+      const lw = rad * -lng, phi = rad * lat,
+        d = toDays(date), n = julianCycle(d, lw), ds = approxTransit(0, lw, n),
+        M = solarMeanAnomaly(ds), L = eclipticLongitude(M), dec = declination(L),
+        Jnoon = solarTransitJ(ds, M, L);
+
+      const h0 = -0.833 * rad;
+      const w = hourAngle(h0, phi, dec);
+      const a = approxTransit(w, lw, n);
+      const Jset = solarTransitJ(a, M, L);
+      const Jrise = Jnoon - (Jset - Jnoon);
+
+      return { sunrise: fromJulian(Jrise), sunset: fromJulian(Jset) };
+    }
+
+    const times = getTimes(new Date(), 49.6233, 6.2044);
+    const fmt = t => t.toLocaleTimeString('de-DE', {hour:'2-digit', minute:'2-digit'});
+    document.getElementById('sunrise').textContent = fmt(times.sunrise);
+    document.getElementById('sunset').textContent = fmt(times.sunset);
+  })();
+
+  // --- Fuel Planning (M&B) ---
+  const EXTRA_BOUNDS = {min:0, max:100};
+
+  function computeMinimum(){
+    const tripInput = document.getElementById('fuelTrip');
+    const alternateInput = document.getElementById('fuelAlternate');
+    const taxi = +document.getElementById('fuelTaxi').value || 0;
+    const trip = +tripInput.value || 0;
+    const contingency = Math.ceil(trip * 0.05);
+    const finalReserve = 27;
+    const alternate = +alternateInput.value || 0;
+
+    const contingencyEl = document.getElementById('fuelContingency');
+    const noTrip = trip === 0;
+    contingencyEl.textContent = noTrip ? '–' : contingency;
+    tripInput.classList.toggle('fuel-warn', noTrip);
+
+    const noAlternate = alternate === 0;
+    alternateInput.classList.toggle('fuel-warn', noAlternate);
+
+    return taxi + trip + contingency + finalReserve + alternate;
+  }
+
+  // Neu berechnet, wenn Taxi/Trip/Alternate/Extra geändert werden: Total = Minimum + Extra.
+  // Übersteigt das die Tankkapazität, fällt Total auf 180 L zurück und Extra wird auf die
+  // Differenz reduziert – Total wird dadurch nicht mehr rot markiert.
+  function calcFuel(){
+    const minimum = computeMinimum();
+    let extra = +document.getElementById('fuelExtra').value || 0;
+    let total = minimum + extra;
+
+    if(total > TOTAL_FUEL_CAPACITY_L){
+      total = Math.max(minimum, TOTAL_FUEL_CAPACITY_L);
+      extra = Math.max(EXTRA_BOUNDS.min, total - minimum);
+      document.getElementById('fuelExtra').value = extra;
+    }
+
+    document.getElementById('fuelMinimum').textContent = minimum;
+    document.getElementById('fuelTotal').value = total;
+    computeMB();
+  }
+
+  // Während der Eingabe: nur Extra live nachführen, Total-Feld dabei nicht überschreiben
+  // (sonst würde das Tippen im Total-Feld ständig unterbrochen)
+  function calcFromTotalLive(){
+    const minimum = computeMinimum();
+    document.getElementById('fuelMinimum').textContent = minimum;
+
+    const totalInput = document.getElementById('fuelTotal');
+    const total = +totalInput.value || 0;
+
+    let extra = total - minimum;
+    extra = Math.max(EXTRA_BOUNDS.min, Math.min(EXTRA_BOUNDS.max, extra));
+
+    document.getElementById('fuelExtra').value = extra;
+    computeMB();
+  }
+
+  // Beim Verlassen des Feldes: Total auf den tatsächlich erreichbaren Wert festlegen
+  function calcFromTotalFinal(){
+    const minimum = computeMinimum();
+    document.getElementById('fuelMinimum').textContent = minimum;
+
+    const totalInput = document.getElementById('fuelTotal');
+    let total = +totalInput.value || 0;
+    total = Math.max(minimum, total);
+
+    // Über der physischen Tankkapazität: direkt auf die maximale Tankkapazität zurückspringen.
+    // Die Kapazität ist hier die bindende Grenze, daher wird Extra Fuel dafür nicht auf
+    // EXTRA_BOUNDS.max gedeckelt (sonst würde z.B. bei niedrigem Minimum nicht 180, sondern
+    // nur Minimum+EXTRA_BOUNDS.max erreicht).
+    if(total > TOTAL_FUEL_CAPACITY_L){
+      // Falls schon das Minimum allein über der Kapazität liegt, darf trotzdem nicht unter
+      // das Minimum zurückgesprungen werden (sonst würde zu wenig Kraftstoff suggeriert) –
+      // computeMB() markiert diesen (dann unlösbaren) Fall weiterhin korrekt rot.
+      total = Math.max(minimum, TOTAL_FUEL_CAPACITY_L);
+      const extra = Math.max(EXTRA_BOUNDS.min, total - minimum);
+      document.getElementById('fuelExtra').value = extra;
+      totalInput.value = total;
+      computeMB();
+      return;
+    }
+
+    let extra = total - minimum;
+    extra = Math.max(EXTRA_BOUNDS.min, Math.min(EXTRA_BOUNDS.max, extra));
+
+    document.getElementById('fuelExtra').value = extra;
+    totalInput.value = minimum + extra;
+    computeMB();
+  }
+
+  const fuelBounds = {
+    fuelTaxi:         {min:10, max:50},
+    fuelTrip:         {min:35, max:100},
+    fuelAlternate:    {min:0,  max:35},
+    fuelExtra:        {min:0,  max:100},
+  };
+
+  ['fuelTaxi','fuelTrip','fuelAlternate','fuelExtra'].forEach(id=>{
+    const input = document.getElementById(id);
+    input.addEventListener('input', calcFuel);
+
+    const bound = fuelBounds[id];
+    if(bound){
+      input.addEventListener('blur', e=>{
+        let v = +e.target.value;
+        if(isNaN(v)) v = bound.min;
+        v = Math.max(bound.min, Math.min(bound.max, v));
+        e.target.value = v;
+        calcFuel();
+      });
+      input.addEventListener('keydown', e=>{
+        if(e.key === 'Enter') e.target.blur();
+      });
+    }
+  });
+
+  const flightInfoBounds = {
+    fiPob:         {min:1,    max:4,    step:1},
+    fiFuelDensity: {min:0.70, max:0.80, step:0.01},
+  };
+
+  Object.keys(flightInfoBounds).forEach(id=>{
+    const input = document.getElementById(id);
+    const bound = flightInfoBounds[id];
+    input.addEventListener('blur', e=>{
+      let v = +e.target.value;
+      if(isNaN(v)) v = bound.min;
+      v = Math.max(bound.min, Math.min(bound.max, v));
+      e.target.value = bound.step < 1 ? v.toFixed(2) : v;
+      if(typeof computeMB === 'function') computeMB();
+    });
+    input.addEventListener('keydown', e=>{
+      if(e.key === 'Enter') e.target.blur();
+    });
+  });
+
+  // Fuel Density live in die M&B-Berechnung übernehmen, während getippt wird
+  document.getElementById('fiFuelDensity').addEventListener('input', ()=>{
+    if(typeof computeMB === 'function') computeMB();
+  });
+
+  // POB (Home-Seite) auf die Sitze in der M&B-Rechnung übertragen: Sitze über POB
+  // werden zu fixen 0 kg-Feldern (disabled), Sitze bis POB bleiben editierbar.
+  function applyPobToSeats(){
+    const pob = Math.round(+document.getElementById('fiPob').value) || 2;
+    [1, 2, 3, 4].forEach(n=>{
+      const seatEl = document.getElementById('mbSeat' + n);
+      if(!seatEl) return;
+      const shouldBeFixed = n > pob;
+      if(shouldBeFixed){
+        seatEl.value = 0;
+        seatEl.disabled = true;
+        seatEl.classList.remove('fuel-warn');
+      } else {
+        seatEl.disabled = false;
+      }
+    });
+    if(typeof computeMB === 'function') computeMB();
+  }
+
+  document.getElementById('fiPob').addEventListener('input', applyPobToSeats);
+  document.getElementById('fiPob').addEventListener('blur', applyPobToSeats);
+
+  // Minus/Plus-Buttons zum Verändern der POB-Anzahl
+  const fiPobInput = document.getElementById('fiPob');
+  const fiPobMinusBtn = document.getElementById('fiPobMinus');
+  const fiPobPlusBtn = document.getElementById('fiPobPlus');
+  const POB_MIN = 1, POB_MAX = 4;
+
+  function updatePobStepperState(){
+    const v = +fiPobInput.value;
+    fiPobMinusBtn.disabled = v <= POB_MIN;
+    fiPobPlusBtn.disabled = v >= POB_MAX;
+  }
+
+  function stepPob(delta){
+    let v = (+fiPobInput.value || POB_MIN) + delta;
+    v = Math.max(POB_MIN, Math.min(POB_MAX, v));
+    fiPobInput.value = v;
+    updatePobStepperState();
+    applyPobToSeats();
+  }
+
+  fiPobMinusBtn.addEventListener('click', ()=> stepPob(-1));
+  fiPobPlusBtn.addEventListener('click', ()=> stepPob(1));
+  fiPobInput.addEventListener('input', updatePobStepperState);
+  fiPobInput.addEventListener('blur', updatePobStepperState);
+
+  applyPobToSeats();
+  updatePobStepperState();
+
+  // Minus/Plus-Buttons zum Verändern der Fuel Density
+  const fiFuelDensityInput = document.getElementById('fiFuelDensity');
+  const fiFuelDensityMinusBtn = document.getElementById('fiFuelDensityMinus');
+  const fiFuelDensityPlusBtn = document.getElementById('fiFuelDensityPlus');
+  const FUEL_DENSITY_MIN = 0.70, FUEL_DENSITY_MAX = 0.80, FUEL_DENSITY_STEP = 0.01;
+
+  function updateFuelDensityStepperState(){
+    const v = +fiFuelDensityInput.value;
+    fiFuelDensityMinusBtn.disabled = v <= FUEL_DENSITY_MIN;
+    fiFuelDensityPlusBtn.disabled = v >= FUEL_DENSITY_MAX;
+  }
+
+  function stepFuelDensity(delta){
+    let v = (+fiFuelDensityInput.value || FUEL_DENSITY_MIN) + delta;
+    v = Math.max(FUEL_DENSITY_MIN, Math.min(FUEL_DENSITY_MAX, v));
+    fiFuelDensityInput.value = v.toFixed(2);
+    updateFuelDensityStepperState();
+    if(typeof computeMB === 'function') computeMB();
+  }
+
+  fiFuelDensityMinusBtn.addEventListener('click', ()=> stepFuelDensity(-FUEL_DENSITY_STEP));
+  fiFuelDensityPlusBtn.addEventListener('click', ()=> stepFuelDensity(FUEL_DENSITY_STEP));
+  fiFuelDensityInput.addEventListener('input', updateFuelDensityStepperState);
+  fiFuelDensityInput.addEventListener('blur', updateFuelDensityStepperState);
+
+  updateFuelDensityStepperState();
+
+  // Alternate Aerodrome: nur Großbuchstaben, max. 4 Zeichen; rot markiert, solange nicht genau 4 Buchstaben
+  const fiAlternateInput = document.getElementById('fiAlternate');
+  fiAlternateInput.addEventListener('input', e=>{
+    const v = e.target.value.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 4);
+    e.target.value = v;
+    e.target.classList.toggle('fuel-warn', v.length !== 4);
+    if(typeof computeMB === 'function') computeMB();
+  });
+  // Sobald das Feld verlassen wird (Blur bzw. Enter), NOTAMs für den neuen Alternate
+  // Aerodrome sofort neu laden, ohne dass der manuelle "Refresh"-Button nötig ist.
+  fiAlternateInput.addEventListener('blur', ()=>{
+    if(typeof loadAlternateNotams === 'function') loadAlternateNotams();
+  });
+  fiAlternateInput.addEventListener('keydown', e=>{
+    if(e.key === 'Enter') e.target.blur();
+  });
+  fiAlternateInput.classList.toggle('fuel-warn', fiAlternateInput.value.length !== 4);
+
+  const fuelTotalInput = document.getElementById('fuelTotal');
+  fuelTotalInput.addEventListener('input', calcFromTotalLive);
+  fuelTotalInput.addEventListener('blur', calcFromTotalFinal);
+  fuelTotalInput.addEventListener('keydown', e=>{
+    if(e.key === 'Enter') e.target.blur();
+  });
+
+  // --- Mass & Balance ---
+  // Profil "LXAIB", Stationsdaten und CG-Envelope aus dem W&B-Template
+  const BEW_KG = 647;
+  const BEW_ARM_CM = 211.2;
+  const ARM_SEAT_1_2_CM = 205.0;
+  const ARM_SEAT_3_4_CM = 299.3;
+  const ARM_BAGGAGE_CM = 362.7;
+  const ARM_FUEL_CM = 241.3;
+
+  // Liest die vom Nutzer auf der Home-Seite eingegebene Fuel Density (kg/L).
+  // Fällt auf 0.72 zurück, falls das Feld leer/ungültig ist.
+  function getFuelDensity(){
+    const v = +document.getElementById('fiFuelDensity').value;
+    return (v && v > 0) ? v : 0.72;
+  }
+
+  // Vorwärts-/Rückwärts-CG-Grenzen, im Uhrzeigersinn als Polygon
+  const CG_ENVELOPE = [
+    {cg:210.8, w:625.0},
+    {cg:210.8, w:884.5},
+    {cg:221.0, w:1055.0},
+    {cg:236.2, w:1055.0},
+    {cg:236.2, w:625.0},
+  ];
+
+  function pointInEnvelope(cg, w){
+    let inside = false;
+    for(let i=0, j=CG_ENVELOPE.length-1; i<CG_ENVELOPE.length; j=i++){
+      const xi=CG_ENVELOPE[i].cg, yi=CG_ENVELOPE[i].w;
+      const xj=CG_ENVELOPE[j].cg, yj=CG_ENVELOPE[j].w;
+      const intersect = ((yi>w) !== (yj>w)) && (cg < (xj-xi)*(w-yi)/(yj-yi)+xi);
+      if(intersect) inside = !inside;
+    }
+    return inside;
+  }
+
+  const CHART_X_MIN=206, CHART_X_MAX=241, CHART_Y_MIN=580, CHART_Y_MAX=1100;
+  const CHART_PAD_LEFT=36, CHART_PAD_RIGHT=36, CHART_PAD_TOP=25, CHART_PAD_BOTTOM=25;
+  const CHART_W=300, CHART_H=220;
+
+  function chartX(cm){
+    const plotW = CHART_W - CHART_PAD_LEFT - CHART_PAD_RIGHT;
+    const x = CHART_PAD_LEFT + (cm-CHART_X_MIN)/(CHART_X_MAX-CHART_X_MIN)*plotW;
+    return Math.max(CHART_PAD_LEFT, Math.min(CHART_W-CHART_PAD_RIGHT, x));
+  }
+  // Setzt Position + Farblogik (grün innerhalb der Envelope, rot außerhalb) für einen CG-Punkt samt Tag
+  function plotCGPoint(pointId, tagId, cg, mass){
+    const px = chartX(cg);
+    const py = chartY(mass);
+    const inLimits = pointInEnvelope(cg, mass);
+
+    const point = document.getElementById(pointId);
+    point.setAttribute('cx', px);
+    point.setAttribute('cy', py);
+    point.classList.toggle('out-of-limits', !inLimits);
+
+    const tag = document.getElementById(tagId);
+    tag.setAttribute('x', px + 7);
+    tag.setAttribute('y', py + 3);
+    tag.classList.toggle('out-of-limits', !inLimits);
+
+    return {px, py, inLimits};
+  }
+
+  function chartY(kg){
+    const plotH = CHART_H - CHART_PAD_TOP - CHART_PAD_BOTTOM;
+    const y = CHART_PAD_TOP + plotH - (kg-CHART_Y_MIN)/(CHART_Y_MAX-CHART_Y_MIN)*plotH;
+    return Math.max(CHART_PAD_TOP, Math.min(CHART_H-CHART_PAD_BOTTOM, y));
+  }
+
+  const KG_TO_LBS = 2.20462;
+
+  // Übernimmt die Take-Off Mass (M&B, kg) als Referenzwert für "Weight" (Take-Off-Rechner, lbs).
+  // Ist kein Wert verfügbar (z.B. Seat/Fuel-Werte fehlen), wird 0 lbs gesetzt und rot markiert.
+  function applyTakeoffWeightFromMB(takeoffMassKg){
+    const wNum = document.getElementById('wNum');
+    if(!wNum) return;
+
+    if(takeoffMassKg === null || isNaN(takeoffMassKg)){
+      wNum.value = 0;
+      wNum.dataset.nodata = 'true';
+      if(typeof refreshStepperButtons === 'function') refreshStepperButtons('w');
+      if(typeof calc === 'function') calc();
+      return;
+    }
+
+    wNum.dataset.nodata = 'false';
+    const lbs = Math.round(takeoffMassKg * KG_TO_LBS);
+    wNum.value = lbs; // Zahl zeigt die echte Masse, auch falls über dem kalibrierten Bereich
+    if(typeof refreshStepperButtons === 'function') refreshStepperButtons('w');
+    if(typeof calc === 'function') calc();
+  }
+
+  // Setzt Zahl + Warnfarbe: Masse wird nur rot, wenn sie maxMass überschreitet; CG wird nur
+  // rot, wenn sie (unabhängig von der Masse) links oder rechts der echten Envelope-Grenze liegt.
+  function setMassCG(massId, cgId, mass, cg, maxMass){
+    const massEl = document.getElementById(massId);
+    const cgEl = document.getElementById(cgId);
+    massEl.textContent = mass.toFixed(1);
+    cgEl.textContent = cg.toFixed(1);
+    massEl.classList.toggle('fuel-warn', mass > maxMass);
+    cgEl.classList.toggle('fuel-warn', cg < cgForwardLimitAtMass(mass) || cg > CG_AFT_LIMIT);
+  }
+
+  function computeMB(){
+    // Jede Änderung auf der M&B-Seite entwertet die zuletzt auf der Take-Off-Seite
+    // gesehenen Werte (die Weight-Übernahme unten kann sich dadurch ändern) – der
+    // Take-Off-Status muss also erneut durch Öffnen der Seite bestätigt werden.
+    takeoffVisited = false;
+
+    const seat1El = document.getElementById('mbSeat1');
+    const seat2El = document.getElementById('mbSeat2');
+    const baggageEl = document.getElementById('mbBaggage');
+
+    const seat1 = +seat1El.value || 0;
+    const seat2 = +seat2El.value || 0;
+    const seat3 = +document.getElementById('mbSeat3').value || 0;
+    const seat4 = +document.getElementById('mbSeat4').value || 0;
+    const baggage = +baggageEl.value || 0;
+
+    const fuelTotalEl = document.getElementById('fuelTotal');
+    const totalFuelLiters = +fuelTotalEl.value || 0;
+    const taxiFuelLiters = +document.getElementById('fuelTaxi').value || 0;
+    const tripFuelLiters = +document.getElementById('fuelTrip').value || 0;
+
+    // Total Fuel darf die tatsächliche nutzbare Tankkapazität nicht überschreiten –
+    // physisch unmöglich, daher wie die anderen ungültigen Felder rot markieren.
+    fuelTotalEl.classList.toggle('fuel-warn', totalFuelLiters > TOTAL_FUEL_CAPACITY_L);
+
+    const fuelDensity = getFuelDensity();
+    const rampFuelKg = totalFuelLiters * fuelDensity;
+    const taxiFuelKg = taxiFuelLiters * fuelDensity;
+    const tripFuelKg = tripFuelLiters * fuelDensity;
+
+    document.getElementById('mbFuelDensityLabel1').textContent = fuelDensity.toFixed(2);
+    document.getElementById('mbFuelDensityLabel2').textContent = fuelDensity.toFixed(2);
+    document.getElementById('mbAlternateAerodromeLabel').textContent = document.getElementById('fiAlternate').value;
+
+    const mbFuelEl = document.getElementById('mbFuel');
+
+    // Seat 1, Seat 2 und Baggage müssen ausgefüllt sein; falls eins davon leer/0 ist,
+    // wird es rot markiert (unabhängig vom Fuel-Wert)
+    const seat1Empty = seat1 === 0 && !seat1El.disabled;
+    const seat2Empty = seat2 === 0 && !seat2El.disabled;
+    const baggageEmpty = baggage === 0;
+
+    seat1El.classList.toggle('fuel-warn', seat1Empty);
+    seat2El.classList.toggle('fuel-warn', seat2Empty);
+    baggageEl.classList.toggle('fuel-warn', baggageEmpty);
+
+    // Alle aktiven (nicht durch POB fixierten) Sitze rot markieren, solange sie leer/0 sind
+    [3, 4].forEach(n=>{
+      const seatEl = document.getElementById('mbSeat' + n);
+      if(!seatEl || seatEl.disabled) return;
+      const val = +seatEl.value || 0;
+      seatEl.classList.toggle('fuel-warn', val === 0);
+    });
+
+    // Fuel: gleiche Logik wie der "Fuel Planning"-Status auf der Home-Seite. Solange die
+    // Fuel-Planning-Box unvollständig ist, zeigt Fuel einen Strich statt eines Werts.
+    const fuelPlanningPanel = document.getElementById('panelFuelPlanning');
+    const fuelPlanningWarn = !!fuelPlanningPanel && !!fuelPlanningPanel.querySelector('.fuel-warn, .out-of-limits');
+    mbFuelEl.textContent = fuelPlanningWarn ? '–' : rampFuelKg.toFixed(1);
+    mbFuelEl.classList.toggle('pending', fuelPlanningWarn);
+
+    // Verbleibender Kraftstoff bei der Landung: Ramp Fuel abzüglich Taxi- und Trip Fuel.
+    // Hängt nur vom Fuel-Wert ab (nicht von Seat/Baggage), erscheint also schon,
+    // sobald Fuel oben nicht mehr rot ist.
+    const mbRemainingFuelEl = document.getElementById('mbRemainingFuel');
+    if(fuelPlanningWarn){
+      mbRemainingFuelEl.textContent = '–';
+    } else {
+      const remainingFuelKg = rampFuelKg - taxiFuelKg - tripFuelKg;
+      mbRemainingFuelEl.textContent = remainingFuelKg.toFixed(1);
+    }
+
+    const connector = document.getElementById('cgConnector');
+    const status = document.getElementById('cgStatus');
+    const chartEls = ['cgPointTakeoff','cgTagTakeoff','cgPointLanding','cgTagLanding','cgPointZeroFuel','cgTagZeroFuel'];
+
+    // Solange eines der 4 Werte oben (Seat 1, Seat 2, Baggage, Fuel) rot ist,
+    // werden Massen/CG nicht berechnet und Diagramm/Status ausgeblendet
+    const blockCompute = seat1Empty || seat2Empty || baggageEmpty || fuelPlanningWarn;
+    if(blockCompute){
+      ['mbZeroFuelMass','mbZeroFuelCG','mbRampMass','mbRampCG','mbTakeoffMass','mbTakeoffCG','mbLandingMass','mbLandingCG'].forEach(id=>{
+        const el = document.getElementById(id);
+        el.textContent = '–';
+        el.classList.remove('fuel-warn');
+      });
+
+      chartEls.forEach(id=>{ document.getElementById(id).style.visibility = 'hidden'; });
+      connector.style.visibility = 'hidden';
+
+      status.textContent = '';
+      status.classList.remove('out-of-limits');
+
+      applyTakeoffWeightFromMB(null);
+      return;
+    }
+
+    chartEls.forEach(id=>{ document.getElementById(id).style.visibility = ''; });
+    connector.style.visibility = '';
+
+    const paxBagMoment = seat1*ARM_SEAT_1_2_CM + seat2*ARM_SEAT_1_2_CM
+      + seat3*ARM_SEAT_3_4_CM + seat4*ARM_SEAT_3_4_CM
+      + baggage*ARM_BAGGAGE_CM;
+    const paxBagWeight = seat1 + seat2 + seat3 + seat4 + baggage;
+
+    // Ramp Mass: BEW + Insassen/Gepäck + gesamter getankter Kraftstoff (vor dem Rollen)
+    const rampMass = BEW_KG + paxBagWeight + rampFuelKg;
+    const rampMoment = BEW_KG*BEW_ARM_CM + paxBagMoment + rampFuelKg*ARM_FUEL_CM;
+    const rampCG = rampMass > 0 ? rampMoment / rampMass : BEW_ARM_CM;
+    setMassCG('mbRampMass', 'mbRampCG', rampMass, rampCG, 1058);
+
+    // Take-Off Mass: Ramp Mass abzüglich verbrauchtem Rollkraftstoff (Taxi Fuel)
+    const takeoffMass = rampMass - taxiFuelKg;
+    const takeoffMoment = rampMoment - taxiFuelKg*ARM_FUEL_CM;
+    const takeoffCG = takeoffMass > 0 ? takeoffMoment / takeoffMass : BEW_ARM_CM;
+    setMassCG('mbTakeoffMass', 'mbTakeoffCG', takeoffMass, takeoffCG, 1055);
+
+    // Landing Mass: Take-Off Mass abzüglich verbrauchtem Streckenkraftstoff (Trip Fuel)
+    const landingMass = takeoffMass - tripFuelKg;
+    const landingMoment = takeoffMoment - tripFuelKg*ARM_FUEL_CM;
+    const landingCG = landingMass > 0 ? landingMoment / landingMass : BEW_ARM_CM;
+    setMassCG('mbLandingMass', 'mbLandingCG', landingMass, landingCG, 1055);
+
+    // Zero Fuel Mass: BEW + Insassen/Gepäck, ganz ohne Kraftstoff
+    const zeroFuelMass = BEW_KG + paxBagWeight;
+    const zeroFuelMoment = BEW_KG*BEW_ARM_CM + paxBagMoment;
+    const zeroFuelCG = zeroFuelMass > 0 ? zeroFuelMoment / zeroFuelMass : BEW_ARM_CM;
+    setMassCG('mbZeroFuelMass', 'mbZeroFuelCG', zeroFuelMass, zeroFuelCG, 1055);
+
+    // Diagramm: je ein Punkt mit Tag für Take-Off, Landing und Zero Fuel
+    const takeoffPlot = plotCGPoint('cgPointTakeoff', 'cgTagTakeoff', takeoffCG, takeoffMass);
+    const landingPlot = plotCGPoint('cgPointLanding', 'cgTagLanding', landingCG, landingMass);
+    const zeroFuelPlot = plotCGPoint('cgPointZeroFuel', 'cgTagZeroFuel', zeroFuelCG, zeroFuelMass);
+
+    // Graue Linie verbindet die drei Punkte (Take-Off -> Landing -> Zero Fuel)
+    connector.setAttribute('points',
+      `${takeoffPlot.px},${takeoffPlot.py} ${landingPlot.px},${landingPlot.py} ${zeroFuelPlot.px},${zeroFuelPlot.py}`
+    );
+
+    // Status bezieht sich auf den Take-Off-Punkt (primärer Referenzpunkt)
+    const inLimits = takeoffPlot.inLimits;
+    status.textContent = inLimits ? 'Within CG limits' : 'Outside CG limits';
+    status.classList.toggle('out-of-limits', !inLimits);
+
+    applyTakeoffWeightFromMB(takeoffMass);
+  }
+
+  const mbBounds = {
+    mbSeat1:   {min:0, max:150},
+    mbSeat2:   {min:0, max:150},
+    mbSeat3:   {min:0, max:150},
+    mbSeat4:   {min:0, max:150},
+    mbBaggage: {min:0, max:100},
+  };
+
+  ['mbSeat1','mbSeat2','mbSeat3','mbSeat4','mbBaggage'].forEach(id=>{
+    const input = document.getElementById(id);
+    input.addEventListener('input', computeMB);
+
+    const bound = mbBounds[id];
+    input.addEventListener('blur', e=>{
+      let v = +e.target.value;
+      if(isNaN(v)) v = bound.min;
+      v = Math.max(bound.min, Math.min(bound.max, v));
+      e.target.value = v;
+      computeMB();
+    });
+    input.addEventListener('keydown', e=>{
+      if(e.key === 'Enter') e.target.blur();
+    });
+  });
+
+  calcFuel();
+
+  // Ans Ende des Scripts verschoben, damit alle oben deklarierten let/const-Variablen
+  // (SKELETON_WIDTHS, FETCH_TIMEOUT_MS, EBBU_NOTAM_API, lastFetchedAt, ebbuFetchedAt,
+  // alternateNotamFetchedAt, ...) bereits initialisiert sind, bevor loadBriefing() sie
+  // im ersten synchronen Teil der Ladefunktionen verwendet.
+  loadBriefing();
+</script>
+
+<script>
+  // --- Digitalisierte Basis-Kurven (Distanz über 50ft Barrier, 2325 lbs, kein Wind) ---
+  // Punkte: [OAT °C, Distanz ft] je Pressure-Altitude-Kurve, abgelesen aus Figure 5-9
+  const paCurves = {
+    0:    [[-20,700],[0,1000],[20,1450],[40,2250],[45,2500]],
+    2000: [[-20,850],[0,1317],[20,1722],[40,2750],[45,3050]],
+    4000: [[-20,1050],[0,1500],[20,2200],[40,3500],[45,3900]],
+    6000: [[-20,1300],[0,1900],[20,2800],[40,4500],[45,5050]],
+  };
+  const paLevels = [0,2000,4000,6000];
+
+  function interpOAT(curve, oat){
+    if(oat <= curve[0][0]) return curve[0][1];
+    if(oat >= curve[curve.length-1][0]) return curve[curve.length-1][1];
+    for(let i=0;i<curve.length-1;i++){
+      const [x0,y0]=curve[i], [x1,y1]=curve[i+1];
+      if(oat>=x0 && oat<=x1){
+        const t=(oat-x0)/(x1-x0);
+        return y0 + t*(y1-y0);
+      }
+    }
+  }
+
+  function baseDistance(pa, oat){
+    const paClamped = Math.max(0, Math.min(6000, pa));
+    let lo=0, hi=2000;
+    for(let i=0;i<paLevels.length-1;i++){
+      if(paClamped>=paLevels[i] && paClamped<=paLevels[i+1]){ lo=paLevels[i]; hi=paLevels[i+1]; }
+    }
+    const dLo = interpOAT(paCurves[lo], oat);
+    const dHi = interpOAT(paCurves[hi], oat);
+    const t = hi>lo ? (paClamped-lo)/(hi-lo) : 0;
+    return dLo + t*(dHi-dLo);
+  }
+
+  // Gewichts-Korrektur: Distanz skaliert mit Gewicht (Fächerlinien Panel 2)
+  // Exponent kalibriert an Referenzpunkt: 3000ft/20°C/2000lbs/0kt -> 1950 ft
+  function weightFactor(w){
+    return Math.pow(w/2325, 0.89);
+  }
+
+  // Wind-Korrektur: Gegenwind reduziert, Rückenwind erhöht Distanz überproportional
+  function windFactor(kt, isHeadwind){
+    if(isHeadwind) return 1 - 0.0125*kt; // ~15kt -> -18.75%
+    return 1 + 0.033*kt; // Rückenwind wirkt ca. 2.5x stärker
+  }
+
+  // Kalibrierungsfaktor: gleicht das digitalisierte Modell an das im Chart
+  // angegebene Rechenbeispiel an (500ft / 38°C / 2325lbs / 15kt Gegenwind -> 2100 ft)
+  const CAL_FACTOR = 1.1287;
+  const MAX_TAKEOFF_MASS_LBS = 2325; // entspricht 1055 kg (MTOM lt. CG-Envelope)
+  const AVAILABLE_RUNWAY_M = 4002; // verfügbare Piste (ELLX)
+
+  // Setzt die Status-Badges auf der Home-Seite: "Ready", solange die jeweilige Box/Seite
+  // keine roten (fuel-warn/out-of-limits) Felder enthält, sonst "Incomplete".
+  function setStatusBadge(elId, containerId, extraReady){
+    const el = document.getElementById(elId);
+    if(!el) return;
+    const container = document.getElementById(containerId);
+    const ready = !!container && !container.querySelector('.fuel-warn, .out-of-limits')
+                  && (extraReady === undefined || extraReady);
+    el.textContent = ready ? 'Complete' : 'Incomplete';
+    el.classList.toggle('ready', ready);
+    el.classList.toggle('incomplete', !ready);
+  }
+
+  function updateStatusBadges(){
+    setStatusBadge('statusFuelPlanning', 'panelFuelPlanning');
+    setStatusBadge('statusCG', 'panelCenterOfGravity');
+    // "Complete" (grün) erst, wenn die Take-Off-Seite mindestens einmal geöffnet wurde.
+    setStatusBadge('statusTakeoff', 'view-takeoff', takeoffVisited);
+  }
+
+  function calc(){
+    const pa = +document.getElementById('paNum').value;
+    const oat = +document.getElementById('oatNum').value;
+    const w = +document.getElementById('wNum').value;
+    const wind = +document.getElementById('windNum').value;
+    const isHW = document.getElementById('hwBtn').classList.contains('active');
+
+    const wNumEl = document.getElementById('wNum');
+    const wNoData = wNumEl.dataset.nodata === 'true';
+    const wRaw = +wNumEl.value; // echter Eingabewert, auch falls über dem Slider-Limit
+    wNumEl.classList.toggle('fuel-warn', wNoData || wRaw > MAX_TAKEOFF_MASS_LBS);
+
+    // Solange keine Mass aus der M&B-Seite vorliegt, lässt sich keine sinnvolle Distanz
+    // berechnen (würde sonst 0 m anzeigen) – stattdessen Gedankenstrich, wie bei den
+    // anderen "pending"-Werten in der App.
+    const distanceEl = document.getElementById('distance');
+    const runwayFillEl = document.getElementById('runwayFill');
+
+    if(wNoData){
+      distanceEl.innerHTML = '–<span class="unit unit-primary">m</span>';
+      distanceEl.classList.remove('ok', 'exceeds');
+      distanceEl.classList.add('pending');
+      runwayFillEl.style.width = '0%';
+      runwayFillEl.classList.remove('exceeds');
+      updateStatusBadges();
+      return;
+    }
+
+    const base = baseDistance(pa, oat);
+    const wCorr = base * weightFactor(w);
+    const final = wCorr * windFactor(wind, isHW) * CAL_FACTOR;
+
+    const distFt = Math.round(final/10)*10;
+    const distM = Math.ceil(distFt * 0.3048);
+
+    distanceEl.innerHTML = distM + '<span class="unit unit-primary">m</span> <span class="unit">(' + distFt + ' ft)</span>';
+    distanceEl.classList.remove('pending');
+
+    const exceeds = distM > AVAILABLE_RUNWAY_M;
+    distanceEl.classList.toggle('ok', !exceeds);
+    distanceEl.classList.toggle('exceeds', exceeds);
+    runwayFillEl.classList.toggle('exceeds', exceeds);
+
+    const pct = Math.min(100, (distM/AVAILABLE_RUNWAY_M)*100);
+    runwayFillEl.style.width = pct+'%';
+
+    updateStatusBadges();
+  }
+
+  const bounds = {
+    pa:   {min:0,    max:4000, step:100},
+    oat:  {min:-20,  max:40,   step:1},
+    w:    {min:1600, max:2325, step:100},
+    wind: {min:0,    max:15,   step:1},
+  };
+
+  // Aktiviert/deaktiviert die +/- Stepper-Buttons an den jeweiligen Grenzwerten (gleiches
+  // Muster wie POB/Fuel Density auf der Home-Seite). Wird auch von den METAR-/M&B-Auto-Fill-
+  // Funktionen aufgerufen, da diese den Zahlenwert direkt setzen (ohne Klick-Event).
+  function refreshStepperButtons(id){
+    const {min,max} = bounds[id];
+    const num = document.getElementById(id+'Num');
+    const minusBtn = document.getElementById(id+'Minus');
+    const plusBtn = document.getElementById(id+'Plus');
+    if(!num || !minusBtn || !plusBtn) return;
+    const v = +num.value;
+    minusBtn.disabled = v <= min;
+    plusBtn.disabled = v >= max;
+  }
+
+  ['pa','oat','w','wind'].forEach(id=>{
+    const {min,max,step} = bounds[id];
+    const num = document.getElementById(id+'Num');
+    const minusBtn = document.getElementById(id+'Minus');
+    const plusBtn = document.getElementById(id+'Plus');
+
+    function stepValue(delta){
+      let cur = +num.value;
+      if(isNaN(cur)) cur = min; // nur bei ungültigem/leerem Wert auf min zurückfallen (0 ist ein gültiger Wert!)
+      let v;
+      if((id === 'pa' || id === 'w') && cur % step !== 0){
+        // Steht der Wert (z.B. aus dem METAR bzw. der M&B-Seite übernommen) nicht auf einem
+        // vollen Hunderter, rundet der erste Klick zunächst auf den nächsten Hunderter in
+        // Klickrichtung; danach normale 100er-Schritte.
+        v = delta > 0 ? Math.ceil(cur / step) * step : Math.floor(cur / step) * step;
+      } else {
+        v = cur + delta;
+      }
+      v = Math.max(min, Math.min(max, v));
+      num.value = v;
+      num.classList.remove('fuel-warn'); // manuelle Änderung: rot (fehlendes METAR) wird wieder amber
+      if(id === 'w') num.dataset.nodata = 'false';
+      refreshStepperButtons(id);
+      calc();
+    }
+
+    minusBtn.addEventListener('click', ()=> stepValue(-step));
+    plusBtn.addEventListener('click', ()=> stepValue(step));
+
+    num.addEventListener('input', ()=>{
+      num.classList.remove('fuel-warn'); // manuelle Änderung: rot (fehlendes METAR) wird wieder amber
+      if(id === 'w') num.dataset.nodata = 'false';
+      refreshStepperButtons(id);
+      calc();
+    });
+
+    num.addEventListener('blur', e=>{
+      let v = +e.target.value;
+      if(isNaN(v)) v = min;
+      v = Math.max(min, Math.min(max, v));
+      e.target.value = v;
+      num.classList.remove('fuel-warn');
+      if(id === 'w') num.dataset.nodata = 'false';
+      refreshStepperButtons(id);
+      calc();
+    });
+
+    num.addEventListener('keydown', e=>{
+      if(e.key === 'Enter') e.target.blur();
+    });
+
+    refreshStepperButtons(id);
+  });
+
+  // Beim Antippen eines Eingabefelds (iOS) den kompletten Wert markieren, damit man
+  // sofort mit der Neueingabe überschreiben kann, statt erst manuell zu markieren.
+  // 'focus' bubbelt nicht, daher mit capture:true am document abgefangen; das deckt
+  // alle .field-value-input-Felder ab (auch zukünftig hinzukommende).
+  document.addEventListener('focus', e => {
+    if(e.target.classList && e.target.classList.contains('field-value-input')){
+      // Kurzes Timeout, da iOS Safari das Markieren sonst direkt wieder durch den
+      // eigenen Tap-zum-Fokussieren-Vorgang aufhebt.
+      setTimeout(() => e.target.select(), 0);
+    }
+  }, true);
+
+  document.getElementById('hwBtn').addEventListener('click', ()=>{
+    document.getElementById('hwBtn').classList.add('active');
+    document.getElementById('twBtn').classList.remove('active');
+    calc();
+  });
+  document.getElementById('twBtn').addEventListener('click', ()=>{
+    document.getElementById('twBtn').classList.add('active');
+    document.getElementById('hwBtn').classList.remove('active');
+    calc();
+  });
+
+  calc();
+</script>
+</body>
+</html>
