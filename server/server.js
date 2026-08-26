@@ -64,6 +64,16 @@ async function fetchJson(url) {
 // max. 20) – wir dürfen also nicht bei jedem Request einen neuen anfordern.
 let autorouterToken = null; // { accessToken, expiresAt }
 
+// Läuft bereits eine Token-Anfrage, teilen sich alle wartenden Aufrufer dieselbe
+// Promise, statt selbst eine eigene HTTP-Anfrage an /oauth2/token zu schicken. Ohne das
+// fordern z.B. die drei parallelen NOTAM-Requests der Briefing-Seite (ELLX/EBBU/
+// Alternate) bei abgelaufenem Token jeweils einen EIGENEN neuen Token an, statt sich
+// einen zu teilen – über mehrere App-Aufrufe (und Render-Neustarts, die
+// autorouterToken im RAM auf null zurücksetzen) summiert sich das schnell auf das
+// autorouter-Limit von 20 gleichzeitig aktiven Tokens ("too many active access
+// tokens").
+let tokenRequestPromise = null;
+
 async function requestAutorouterToken() {
   if (!AUTOROUTER_CLIENT_ID || !AUTOROUTER_CLIENT_SECRET) {
     throw new Error('AUTOROUTER_CLIENT_ID / AUTOROUTER_CLIENT_SECRET sind nicht gesetzt.');
@@ -95,7 +105,18 @@ async function getAutorouterToken(forceRefresh = false) {
   if (!forceRefresh && autorouterToken && Date.now() < autorouterToken.expiresAt) {
     return autorouterToken.accessToken;
   }
-  return requestAutorouterToken();
+  if (forceRefresh) {
+    // Ein erzwungener Refresh darf nicht auf eine evtl. bereits laufende reguläre
+    // Anfrage warten, die noch den (gerade als ungültig erkannten) alten Token liefern
+    // könnte - stattdessen wird eine frische Anfrage gestartet.
+    tokenRequestPromise = null;
+  }
+  if (!tokenRequestPromise) {
+    tokenRequestPromise = requestAutorouterToken().finally(() => {
+      tokenRequestPromise = null;
+    });
+  }
+  return tokenRequestPromise;
 }
 
 // Grober Nachbau der Q-Code-Subject-Gruppe (2./3. Buchstabe des Q-Codes) für die
